@@ -37,6 +37,8 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'role' => $request->user()->role,
+                    'address' => $request->user()->address,
+                    'points' => $request->user()->rewards()->sum('points'),
                 ] : null,
             ],
         ];

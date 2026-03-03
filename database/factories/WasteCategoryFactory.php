@@ -17,7 +17,10 @@ class WasteCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->word(),
+            'slug' => $this->faker->slug(),
+            'points_per_kg' => $this->faker->randomFloat(2, 5, 100),
+            'icon_url' => $this->faker->imageUrl(),
         ];
     }
 }

@@ -10,9 +10,9 @@ export default function GuestLayout({ children }) {
                 <div className="absolute bottom-[20%] right-[10%] w-96 h-96 bg-emerald-300 blur-[100px] rounded-full animate-pulse duration-[4000ms]"></div>
             </div>
 
-            <div className="mb-10 flex flex-col items-center">
+            <div className="mt-12 mb-4 flex flex-col items-center">
                 <Link href="/" className="hover-scale">
-                    <img src="/1-no-bg.png" alt="EcoTrack-NG Logo" className="w-24 h-24 object-contain" />
+                    <img src="/1-no-bg.png" alt="EcoTrack-NG Logo" className="w-32 h-32 object-contain" />
                 </Link>
             </div>
 

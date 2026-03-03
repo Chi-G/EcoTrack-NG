@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage } from '@inertiajs/react';
-import { useState, useRef } from 'react';
+import { Head, usePage, Link } from '@inertiajs/react';
+import { useState, useRef, useEffect } from 'react';
 import {
     Camera,
     Recycle,
@@ -11,7 +11,13 @@ import {
     CheckCircle2,
     AlertCircle,
     Smartphone,
-    TrendingUp
+    TrendingUp,
+    Calendar,
+    MapPin,
+    Clock,
+    X,
+    ChevronRight,
+    Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -21,7 +27,93 @@ export default function ResidentDashboard() {
     const [scanning, setScanning] = useState(false);
     const [scanResult, setScanResult] = useState(null);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        balance: 0,
+        level: { name: 'Eco Starter', level: 1, nextMilestone: 500 }
+    });
+    const [pickups, setPickups] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [isScheduling, setIsScheduling] = useState(false);
+    const [schedulingLoading, setSchedulingLoading] = useState(false);
+    const [newPickup, setNewPickup] = useState({ category_id: '', scheduled_at: '', weight_kg: '' });
+
     const fileInputRef = useRef(null);
+
+    const fetchCategories = async () => {
+        try {
+            const res = await axios.get('/api/waste-categories');
+            setCategories(res.data || []);
+        } catch (err) {
+            console.error('Failed to fetch categories:', err);
+        }
+    };
+
+    const fetchDashboardData = async () => {
+        setLoading(true);
+        try {
+            const [rewardsRes, pickupsRes] = await Promise.all([
+                axios.get('/api/rewards/balance'),
+                axios.get('/api/waste-pickups')
+            ]);
+
+            setStats(prev => ({
+                ...prev,
+                balance: rewardsRes.data.balance,
+                level: determineLevel(rewardsRes.data.balance)
+            }));
+
+            setPickups(pickupsRes.data.data || []);
+        } catch (err) {
+            console.error('Failed to fetch dashboard data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDashboardData();
+        fetchCategories();
+    }, []);
+
+    const handleSchedulePickup = async (e) => {
+        e.preventDefault();
+        setSchedulingLoading(true);
+        try {
+            await axios.post('/api/waste-pickups', newPickup);
+            setIsScheduling(false);
+            setNewPickup({ category_id: '', scheduled_at: '', weight_kg: '' });
+            fetchDashboardData(); // Refresh list
+        } catch (err) {
+            console.error('Scheduling failed', err);
+            alert('Failed to schedule pickup. Please check your inputs.');
+        } finally {
+            setSchedulingLoading(false);
+        }
+    };
+
+    const getCategoryNameById = (id) => {
+        const category = categories.find(cat => cat.id === id);
+        return category ? category.name : 'Unknown';
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'pending': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+            case 'assigned': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+            case 'completed': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+            case 'cancelled': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+            default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+        }
+    };
+
+    const determineLevel = (points) => {
+        if (points >= 5000) return { name: 'Emerald Master', level: 5, nextMilestone: 10000 };
+        if (points >= 2000) return { name: 'Elite Recycler', level: 4, nextMilestone: 5000 };
+        if (points >= 1000) return { name: 'Green Guardian', level: 3, nextMilestone: 2000 };
+        if (points >= 500) return { name: 'Eco Enthusiast', level: 2, nextMilestone: 1000 };
+        return { name: 'Eco Starter', level: 1, nextMilestone: 500 };
+    };
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -61,16 +153,59 @@ export default function ResidentDashboard() {
 
     return (
         <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    EcoTrack-NG Resident Dashboard
-                </h2>
-            }
+            header={null}
         >
             <Head title="Resident Dashboard" />
 
-            <div className="py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
+            <div className="py-6 sm:py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+
+                    {/* Modern Hero Section */}
+                    <div className="relative overflow-hidden rounded-[48px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-xl p-8 sm:p-12">
+                        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                            <div className="space-y-4">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-full text-emerald-600 dark:text-emerald-400 text-sm font-bold uppercase tracking-widest"
+                                >
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                    {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                                </motion.div>
+
+                                <div className="space-y-2">
+                                    <h1 className="text-4xl sm:text-6xl font-black text-gray-900 dark:text-white tracking-tight">
+                                        Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">{auth.user.name.split(' ')[0]}!</span>
+                                    </h1>
+                                    <p className="text-lg text-gray-500 dark:text-gray-400 font-medium sm:whitespace-nowrap">
+                                        You're making a real difference today. Keep up the great recycling streak!
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 sm:gap-6">
+                                <div className="p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-[32px] border border-emerald-100 dark:border-emerald-800/30 flex flex-col items-center min-w-[100px]">
+                                    <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                                        {pickups.length}
+                                    </div>
+                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Pickups</div>
+                                </div>
+                                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-[32px] border border-blue-100 dark:border-blue-800/30 flex flex-col items-center min-w-[100px]">
+                                    <div className="text-3xl font-black text-blue-600 dark:text-blue-400">
+                                        {pickups.reduce((acc, p) => acc + (parseFloat(p.weight_kg) || 0), 0).toFixed(1)}
+                                    </div>
+                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">KG Saved</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Background Decorative Elements */}
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-3xl rounded-full -translate-x-1/3 translate-y-1/3"></div>
+                    </div>
 
                     {/* Welcome & Stats Row */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -79,28 +214,43 @@ export default function ResidentDashboard() {
                             animate={{ opacity: 1, y: 0 }}
                             className="p-8 rounded-[40px] bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 md:col-span-2 relative overflow-hidden"
                         >
-                            <div className="relative z-10 flex justify-between items-center">
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                                        Hello, {auth.user.name.split(' ')[0]}! 👋
-                                    </h3>
-                                    <p className="text-gray-500 dark:text-gray-400">
-                                        Your environmental contribution is making a difference today.
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Level 4 Recycler</div>
-                                    <div className="text-xs text-gray-400">Next level at 5,000 pts</div>
+                            <div className="relative z-10 flex justify-between items-end">
+                                <div className="space-y-4 w-full mr-8">
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                                        <div className="space-y-1">
+                                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-1">Eco-Status</h3>
+                                            <div className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex flex-wrap items-center gap-2">
+                                                {stats.level.name}
+                                                <span className="text-xs sm:text-sm font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/40 px-3 py-1 rounded-full uppercase tracking-wider">
+                                                    Level {stats.level.level}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="text-left sm:text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                            Next Milestone: {stats.level?.nextMilestone?.toLocaleString()} PTS
+                                        </div>
+                                    </div>
+
+                                    <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${Math.min((stats.balance / (stats.level?.nextMilestone || 500)) * 100, 100)}%` }}
+                                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                                        ></motion.div>
+                                    </div>
                                 </div>
                             </div>
+
                             <div className="mt-8 grid grid-cols-2 gap-4">
-                                <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-3xl border border-emerald-100 dark:border-emerald-800">
-                                    <div className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">Eco Points</div>
-                                    <div className="text-2xl font-black text-emerald-900 dark:text-white">1,250</div>
+                                <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-[32px] border border-emerald-100 dark:border-emerald-800/30">
+                                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest mb-1">Eco Tokens</div>
+                                    <div className="text-2xl font-black text-gray-900 dark:text-white">{stats.balance?.toLocaleString()} <span className="text-xs opacity-40">ECT</span></div>
                                 </div>
-                                <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-3xl border border-orange-100 dark:border-orange-800">
-                                    <div className="text-sm text-orange-700 dark:text-orange-300 font-medium">Rewards Pending</div>
-                                    <div className="text-2xl font-black text-orange-900 dark:text-white">₦4,500</div>
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-[32px] border border-blue-100 dark:border-blue-800/30">
+                                    <div className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mb-1">Waste Diverted</div>
+                                    <div className="text-2xl font-black text-gray-900 dark:text-white">
+                                        {pickups.reduce((acc, p) => acc + (parseFloat(p.weight_kg) || 0), 0).toFixed(1)} <span className="text-xs opacity-40">KG</span>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
@@ -114,11 +264,14 @@ export default function ResidentDashboard() {
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
                             <div className="relative z-10">
                                 <Trophy className="w-10 h-10 mb-4 text-emerald-300" />
-                                <h4 className="text-xl font-bold">Top Contributor</h4>
-                                <p className="text-emerald-100/80 text-sm mt-1">You are in the top 5% of residents in your district.</p>
+                                <h4 className="text-xl font-bold">New Pickup</h4>
+                                <p className="text-emerald-100/80 text-sm mt-1">Ready to recycle? Book a collector to your doorstep now.</p>
                             </div>
-                            <button className="mt-6 w-full py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-white/20">
-                                View Leaderboard <ArrowRight className="w-4 h-4" />
+                            <button
+                                onClick={() => setIsScheduling(true)}
+                                className="mt-6 w-full py-4 bg-white text-emerald-600 hover:bg-emerald-50 backdrop-blur-md rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-white/20"
+                            >
+                                Schedule Now <ArrowRight className="w-4 h-4" />
                             </button>
                         </motion.div>
                     </div>
@@ -267,28 +420,216 @@ export default function ResidentDashboard() {
                         </div>
                     </div>
 
+                    {/* Recent Activity Timeline */}
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <History className="w-6 h-6 text-emerald-500" /> Recent Activity
+                            </h3>
+                            <Link href={route('resident.history')} className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                View Full History <ChevronRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 rounded-[40px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                            {pickups.length > 0 ? (
+                                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                    {pickups.slice(0, 5).map((pickup) => (
+                                        <div key={pickup.id} className="p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center">
+                                                    <Recycle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-gray-900 dark:text-white">
+                                                        {pickup.category?.name || 'Waste'} Recycling
+                                                    </div>
+                                                    <div className="text-sm text-gray-500 flex items-center gap-3">
+                                                        <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(pickup.scheduled_at).toLocaleDateString()}</span>
+                                                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(pickup.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(pickup.status)}`}>
+                                                    {pickup.status}
+                                                </div>
+                                                <div className="text-right hidden sm:block">
+                                                    <div className="font-bold text-gray-900 dark:text-white">+{pickup.points_awarded || 0} pts</div>
+                                                    <div className="text-xs text-gray-400">{pickup.weight_kg || '—'} kg</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="p-12 text-center space-y-4">
+                                    <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900/50 rounded-full flex items-center justify-center mx-auto">
+                                        <History className="w-10 h-10 text-gray-300" />
+                                    </div>
+                                    <div className="text-gray-500">No recycling activity yet. Your future pickups will appear here!</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Quick Actions Row */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[
-                            { icon: <Recycle className="text-blue-500" />, label: 'Schedule', color: 'blue' },
-                            { icon: <Trophy className="text-orange-500" />, label: 'Rewards', color: 'orange' },
-                            { icon: <History className="text-purple-500" />, label: 'History', color: 'purple' },
-                            { icon: <TrendingUp className="text-emerald-500" />, label: 'Stats', color: 'emerald' },
-                        ].map((action, i) => (
-                            <motion.button
-                                key={i}
-                                whileHover={{ y: -5 }}
-                                className={`p-6 rounded-[32px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 transition-shadow hover:shadow-lg`}
-                            >
-                                <div className={`w-14 h-14 bg-${action.color}-50 dark:bg-${action.color}-900/20 rounded-2xl flex items-center justify-center`}>
-                                    {action.icon}
+                        <motion.button
+                            whileHover={{ y: -5 }}
+                            onClick={() => setIsScheduling(true)}
+                            className="p-6 rounded-[32px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center gap-3 transition-shadow hover:shadow-lg"
+                        >
+                            <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center">
+                                <Recycle className="text-blue-500" />
+                            </div>
+                            <span className="font-bold text-gray-900 dark:text-white">Schedule</span>
+                        </motion.button>
+
+                        <Link
+                            href={route('resident.rewards')}
+                            className="p-6 rounded-[32px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm block transition-all hover:shadow-lg group"
+                        >
+                            <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center gap-3">
+                                <div className="w-14 h-14 bg-orange-50 dark:bg-orange-900/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Trophy className="text-orange-500" />
                                 </div>
-                                <span className="font-bold text-gray-900 dark:text-white">{action.label}</span>
-                            </motion.button>
-                        ))}
+                                <span className="font-bold text-gray-900 dark:text-white">Rewards</span>
+                            </motion.div>
+                        </Link>
+
+                        <Link
+                            href={route('resident.history')}
+                            className="p-6 rounded-[32px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm block transition-all hover:shadow-lg group"
+                        >
+                            <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center gap-3">
+                                <div className="w-14 h-14 bg-purple-50 dark:bg-purple-900/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <History className="text-purple-500" />
+                                </div>
+                                <span className="font-bold text-gray-900 dark:text-white">History</span>
+                            </motion.div>
+                        </Link>
+
+                        <Link
+                            href={route('resident.stats')}
+                            className="p-6 rounded-[32px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm block transition-all hover:shadow-lg group"
+                        >
+                            <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center gap-3">
+                                <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <TrendingUp className="text-emerald-500" />
+                                </div>
+                                <span className="font-bold text-gray-900 dark:text-white">Stats</span>
+                            </motion.div>
+                        </Link>
                     </div>
-                </div>
-            </div>
-        </AuthenticatedLayout>
+                </div >
+            </div >
+
+            {/* Scheduling Modal */}
+            < AnimatePresence >
+                {isScheduling && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsScheduling(false)}
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        ></motion.div>
+
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-xl bg-white dark:bg-gray-800 rounded-[40px] shadow-2xl overflow-hidden border border-white/20 dark:border-gray-700"
+                        >
+                            <div className="p-8 space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-600">
+                                            <Recycle className="w-6 h-6" />
+                                        </div>
+                                        <h3 className="text-2xl font-black text-gray-900 dark:text-white">Schedule Pickup</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsScheduling(false)}
+                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                                    >
+                                        <X className="w-6 h-6 text-gray-400" />
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleSchedulePickup} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Waste Category</label>
+                                            <select
+                                                required
+                                                value={newPickup.category_id}
+                                                onChange={(e) => setNewPickup({ ...newPickup, category_id: e.target.value })}
+                                                className="w-full h-14 px-6 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                                            >
+                                                <option value="">Select category</option>
+                                                {categories.map(cat => (
+                                                    <option key={cat.id} value={cat.id}>{cat.name} ({cat.points_per_kg} pts/kg)</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Est. Weight (kg)</label>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                placeholder="e.g. 2.5"
+                                                value={newPickup.weight_kg}
+                                                onChange={(e) => setNewPickup({ ...newPickup, weight_kg: e.target.value })}
+                                                className="w-full h-14 px-6 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Preferred Date & Time</label>
+                                        <div className="relative">
+                                            <input
+                                                required
+                                                type="datetime-local"
+                                                value={newPickup.scheduled_at}
+                                                onChange={(e) => setNewPickup({ ...newPickup, scheduled_at: e.target.value })}
+                                                className="w-full h-14 px-6 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-3xl flex items-center gap-4 border border-emerald-100 dark:border-emerald-800/30">
+                                        <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shrink-0">
+                                            <MapPin className="w-5 h-5" />
+                                        </div>
+                                        <div className="text-sm text-emerald-800 dark:text-emerald-300">
+                                            A collector will be dispatched to your registered address in <b>{auth.user.address || 'your neighborhood'}</b>.
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={schedulingLoading}
+                                        className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-3xl font-black text-lg transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3"
+                                    >
+                                        {schedulingLoading ? (
+                                            <>
+                                                <Loader2 className="w-6 h-6 animate-spin" /> Scheduling...
+                                            </>
+                                        ) : (
+                                            <>Confirm Booking <ArrowRight className="w-6 h-6" /></>
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+                }
+            </AnimatePresence >
+        </AuthenticatedLayout >
     );
 }

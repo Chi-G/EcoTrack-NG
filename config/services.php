@@ -37,6 +37,10 @@ return [
 
     'google' => [
         'vision_key' => env('GOOGLE_VISION_API_KEY'),
+        'ai_key' => env('GOOGLE_AI_API_KEY'),
     ],
 
+    'openroute' => [
+        'key' => env('OPENROUTE_SERVICE_KEY'),
+    ],
 ];

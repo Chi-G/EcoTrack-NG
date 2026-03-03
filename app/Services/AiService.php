@@ -95,7 +95,7 @@ class AiService
 
     protected function prepareImage(string $imageContent): string
     {
-        // Simple check if it's already base64 or a path
+        //check if it's already base64 or a path
         if (preg_match('/^data:image\/(\w+);base64,/', $imageContent)) {
             return preg_replace('/^data:image\/(\w+);base64,/', '', $imageContent);
         }
