@@ -6,17 +6,26 @@ import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Leaf } from 'lucide-react';
+import OnlineStatus from '@/Components/OnlineStatus';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+    const { auth } = usePage().props;
+    const user = auth?.user;
+
+    if (!user) {
+        return <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+            <div className="animate-pulse text-emerald-500 font-bold tracking-widest">ECOTRACK SECURE SESSION...</div>
+        </div>;
+    }
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+            <OnlineStatus />
             <nav className="border-b border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-[98%] px-4 sm:px-8 lg:px-12">
                     <div className="flex h-24 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
@@ -214,7 +223,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
             {header && (
                 <header className="bg-white shadow dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-[98%] px-4 py-6 sm:px-8 lg:px-12">
                         {header}
                     </div>
                 </header>

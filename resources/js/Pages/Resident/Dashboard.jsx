@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage, Link } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
 import {
+    Truck,
     Camera,
     Recycle,
     Trophy,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function ResidentDashboard() {
     const { auth } = usePage().props;
@@ -37,6 +39,7 @@ export default function ResidentDashboard() {
     const [isScheduling, setIsScheduling] = useState(false);
     const [schedulingLoading, setSchedulingLoading] = useState(false);
     const [newPickup, setNewPickup] = useState({ category_id: '', scheduled_at: '', weight_kg: '' });
+    const [selectedPickupForQR, setSelectedPickupForQR] = useState(null);
 
     const fileInputRef = useRef(null);
 
@@ -158,7 +161,7 @@ export default function ResidentDashboard() {
             <Head title="Resident Dashboard" />
 
             <div className="py-6 sm:py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+                <div className="mx-auto max-w-[98%] px-4 sm:px-8 lg:px-12 space-y-8">
 
                     {/* Modern Hero Section */}
                     <div className="relative overflow-hidden rounded-[48px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-xl p-8 sm:p-12">
@@ -206,6 +209,34 @@ export default function ResidentDashboard() {
                         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-3xl rounded-full -translate-x-1/3 translate-y-1/3"></div>
                     </div>
+
+                    {/* active Pickup Banner - Highly Visible */}
+                    {pickups.filter(p => ['assigned', 'in_transit'].includes(p.status)).map(activePickup => (
+                        <motion.div
+                            key={`active-${activePickup.id}`}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="p-6 rounded-[32px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 flex flex-col sm:flex-row items-center justify-between gap-6 border border-white/10"
+                        >
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-[24px] flex items-center justify-center border border-white/20">
+                                    <Truck className="w-8 h-8 text-white animate-pulse" />
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-100">Collector En Route</div>
+                                    <h4 className="text-xl font-black">{activePickup.collector?.name || 'A Collector'} is coming!</h4>
+                                    <p className="text-sm text-blue-100/80">Have your recyclables ready. Show the QR code when they arrive.</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedPickupForQR(activePickup)}
+                                className="w-full sm:w-auto px-8 py-4 bg-white text-blue-600 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-50 transition-all flex items-center justify-center gap-3"
+                            >
+                                <Smartphone className="w-5 h-5" />
+                                Show QR Code
+                            </button>
+                        </motion.div>
+                    ))}
 
                     {/* Welcome & Stats Row */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -451,6 +482,15 @@ export default function ResidentDashboard() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-4">
+                                                {['assigned', 'in_transit'].includes(pickup.status) && (
+                                                    <button
+                                                        onClick={() => setSelectedPickupForQR(pickup)}
+                                                        className="px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 text-xs font-bold whitespace-nowrap"
+                                                    >
+                                                        <Smartphone size={16} />
+                                                        Show QR
+                                                    </button>
+                                                )}
                                                 <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(pickup.status)}`}>
                                                     {pickup.status}
                                                 </div>
@@ -630,6 +670,53 @@ export default function ResidentDashboard() {
                 )
                 }
             </AnimatePresence >
+
+            {/* QR Code Modal for Verification */}
+            <AnimatePresence>
+                {selectedPickupForQR && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedPickupForQR(null)}
+                            className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-[48px] shadow-2xl overflow-hidden p-8 text-center space-y-8"
+                        >
+                            <div className="space-y-2">
+                                <h3 className="text-2xl font-black text-gray-900 dark:text-white">Verification QR</h3>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm">Show this to your collector to verify and complete the pickup.</p>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-[40px] shadow-inner inline-block border-4 border-emerald-500/20">
+                                <QRCodeSVG
+                                    value={selectedPickupForQR.verification_token}
+                                    size={200}
+                                    level="H"
+                                    includeMargin={true}
+                                />
+                            </div>
+
+                            <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl">
+                                <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Pickup ID</div>
+                                <div className="text-lg font-mono font-bold text-gray-900 dark:text-white">#{selectedPickupForQR.id}</div>
+                            </div>
+
+                            <button
+                                onClick={() => setSelectedPickupForQR(null)}
+                                className="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-2xl font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </AuthenticatedLayout >
     );
 }

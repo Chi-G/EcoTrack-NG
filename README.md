@@ -4,6 +4,8 @@
 
 # EcoTrack-NG 🌍♻️
 ### Intelligent Waste Management & Recycling Marketplace
+**Official Submission for the [3MTT NextGen Knowledge Showcase](https://3mttsupport.tawk.help/article/3mtt-nextgen-knowledge-showcase)**
+*Pillar 3: Environment (Sustainability & Circular Economy)*
 
 EcoTrack-NG is a cutting-edge platform designed to revolutionize waste management in Nigeria. By connecting residents, collectors, and recyclers, we turn **Waste into Wealth** through intelligent classification, real-time logistics, and a robust digital reward system.
 

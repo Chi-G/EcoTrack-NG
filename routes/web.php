@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Api\RewardBalanceController;
 use App\Http\Controllers\Api\WastePickupController;
 use App\Http\Controllers\Api\LocationUpdateController;
+use App\Http\Controllers\Api\CollectorStatsController;
 use App\Models\WasteCategory;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -69,6 +70,8 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('/rewards/balance', [RewardBalanceController::class, 'index']);
         Route::post('/rewards/redeem', [RewardBalanceController::class, 'redeem']);
+        Route::get('/collector/stats', [CollectorStatsController::class, 'index']);
+        Route::patch('/waste-pickups/{waste_pickup}/verify', [WastePickupController::class, 'verify']);
         Route::apiResource('waste-pickups', WastePickupController::class);
         Route::post('/location/update', [LocationUpdateController::class, 'update']);
     });

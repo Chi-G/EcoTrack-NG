@@ -19,7 +19,19 @@ class WastePickup extends Model
         'completed_at',
         'weight_kg',
         'points_awarded',
+        'verification_token',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($pickup) {
+            if (empty($pickup->verification_token)) {
+                $pickup->verification_token = \Illuminate\Support\Str::random(32);
+            }
+        });
+    }
 
     public function resident()
     {

@@ -18,7 +18,7 @@ export default function StatsPage() {
             <Head title="Environmental Impact" />
 
             <div className="py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+                <div className="mx-auto max-w-[98%] px-4 sm:px-8 lg:px-12 space-y-8">
                     <Link href={route('resident.dashboard')} className="flex items-center gap-2 text-emerald-600 font-bold hover:underline mb-4">
                         <ChevronLeft className="w-5 h-5" /> Back to Dashboard
                     </Link>

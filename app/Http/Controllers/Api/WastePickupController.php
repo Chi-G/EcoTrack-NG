@@ -137,4 +137,35 @@ class WastePickupController extends Controller
 
         abort(403, 'Unauthorized access to this pickup.');
     }
+    public function verify(Request $request, WastePickup $wastePickup)
+    {
+        $request->validate([
+            'token' => 'required|string',
+        ]);
+
+        if ($wastePickup->collector_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized. You are not the assigned collector.'], 403);
+        }
+
+        if ($wastePickup->verification_token !== $request->token) {
+            return response()->json(['message' => 'Invalid verification token.'], 422);
+        }
+
+        if ($wastePickup->status === 'completed') {
+            return response()->json(['message' => 'Pickup already completed.'], 400);
+        }
+
+        $wastePickup->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+
+        $this->rewardService->awardPoints($wastePickup);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pickup verified and completed successfully.',
+            'data' => $wastePickup->load(['resident', 'category']),
+        ]);
+    }
 }
