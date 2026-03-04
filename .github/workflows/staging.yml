@@ -32,12 +32,17 @@ jobs:
         run: |
           npm install --legacy-peer-deps
           npm run build
-          rm -rf node_modules # ⚡️ CRITICAL: Remove node_modules to avoid Disk Quota Exceeded
+          # ⚡️ AGGRESSIVE CLEANUP to solve Disk Quota Exceeded
+          rm -rf node_modules
+          rm -rf .git
+          rm -rf .github
+          rm -rf tests
+          rm -rf storage/logs/*
         env:
           VITE_PUSHER_APP_KEY: ${{ secrets.VITE_PUSHER_APP_KEY }}
           VITE_PUSHER_APP_CLUSTER: ${{ secrets.VITE_PUSHER_APP_CLUSTER }}
 
-      - name: Ensure Staging Directory Exists
+      - name: Server Disk Check & Staging Directory Prep
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.WHOGOHOST_SSH_HOST }}
@@ -45,6 +50,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
           script: |
+            echo "📊 Checking Disk Space..."
+            df -h | grep "/home/forahiao" || df -h
             mkdir -p /home/forahiao/public_html/ecotrack_staging.forahia.org.ng
 
       - name: Deploy to Server via SCP
