@@ -32,14 +32,12 @@ jobs:
         run: |
           npm install --legacy-peer-deps
           npm run build
-          # ⚡️ AGGRESSIVE CLEANUP to solve Disk Quota Exceeded
-          rm -rf node_modules
-          rm -rf .git
-          rm -rf .github
-          rm -rf tests
-          rm -rf storage/logs/*
-          # Prune heavy vendor subfolders (e.g., carbon languages)
-          find vendor/nesbot/carbon/src/Carbon/Lang -type f -not -name "en.php" -delete
+          # ⚡️ AGGRESSIVE CLEANUP
+          rm -rf node_modules .git .github tests storage/logs/*
+          find vendor -type d -name "tests" -exec rm -rf {} +
+          find vendor -type d -name "docs" -exec rm -rf {} +
+          # 📦 ZIP the project for single-file transfer (Solves Inode/Quota issues)
+          zip -r deploy.zip . -x "*.git*" "node_modules*"
         env:
           VITE_PUSHER_APP_KEY: ${{ secrets.VITE_PUSHER_APP_KEY }}
           VITE_PUSHER_APP_CLUSTER: ${{ secrets.VITE_PUSHER_APP_CLUSTER }}
@@ -52,25 +50,24 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
           script: |
-            echo "📊 Checking Disk Space..."
+            echo "📊 Checking Disk & Inodes..."
             df -h | grep "/home/forahiao" || df -h
-            echo "🧹 Clearing old files to make room..."
-            cd /home/forahiao/public_html/ecotrack.forahia.org.ng || mkdir -p /home/forahiao/public_html/ecotrack.forahia.org.ng
-            rm -rf app vendor resources public/build storage/framework/views/*
+            df -i | grep "/home/forahiao" || df -i
+            echo "🧹 Clearing target directory..."
+            mkdir -p /home/forahiao/public_html/ecotrack.forahia.org.ng
+            cd /home/forahiao/public_html/ecotrack.forahia.org.ng && rm -rf *
 
-      - name: Deploy to Server via SCP
+      - name: Upload Deployment Archive
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.WHOGOHOST_SSH_HOST }}
           username: ${{ secrets.WHOGOHOST_SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
-          source: "./*"
+          source: "deploy.zip"
           target: "/home/forahiao/public_html/ecotrack.forahia.org.ng"
-          rm: false 
-          strip_components: 0
 
-      - name: Execute Post-Deployment Commands
+      - name: Extract & Post-Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.WHOGOHOST_SSH_HOST }}
@@ -79,9 +76,6 @@ jobs:
           port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
           script: |
             cd /home/forahiao/public_html/ecotrack.forahia.org.ng
+            unzip -o deploy.zip && rm deploy.zip
             php artisan migrate --force
-            php artisan cache:clear
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
             php artisan optimize
