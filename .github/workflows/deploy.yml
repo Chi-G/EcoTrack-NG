@@ -38,11 +38,13 @@ jobs:
           rm -rf .github
           rm -rf tests
           rm -rf storage/logs/*
+          # Prune heavy vendor subfolders (e.g., carbon languages)
+          find vendor/nesbot/carbon/src/Carbon/Lang -type f -not -name "en.php" -delete
         env:
           VITE_PUSHER_APP_KEY: ${{ secrets.VITE_PUSHER_APP_KEY }}
           VITE_PUSHER_APP_CLUSTER: ${{ secrets.VITE_PUSHER_APP_CLUSTER }}
 
-      - name: Server Disk Check & Directory Preparation
+      - name: Server Disk Check & Nuclear Cleanup
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.WHOGOHOST_SSH_HOST }}
@@ -52,7 +54,9 @@ jobs:
           script: |
             echo "📊 Checking Disk Space..."
             df -h | grep "/home/forahiao" || df -h
-            mkdir -p /home/forahiao/public_html/ecotrack.forahia.org.ng
+            echo "🧹 Clearing old files to make room..."
+            cd /home/forahiao/public_html/ecotrack.forahia.org.ng || mkdir -p /home/forahiao/public_html/ecotrack.forahia.org.ng
+            rm -rf app vendor resources public/build storage/framework/views/*
 
       - name: Deploy to Server via SCP
         uses: appleboy/scp-action@v0.1.7
