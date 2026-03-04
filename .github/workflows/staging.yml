@@ -83,10 +83,11 @@ jobs:
             php artisan optimize
 
       - name: Create Pull Request to Main
-        uses: repo-sync/pull-request@v2
+        uses: peter-evans/create-pull-request@v6
         with:
-          source_branch: "staging"
-          destination_branch: "main"
-          pr_title: "🚀 [Auto-PR] New updates from Staging"
-          pr_body: "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge."
-          github_token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
+          branch: "staging-to-main"
+          base: "main"
+          title: "🚀 [Auto-PR] New updates from Staging"
+          body: "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge."
+          delete-branch: true
