@@ -5,6 +5,10 @@ on:
   push:
     branches: [ staging ]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -81,12 +85,11 @@ jobs:
             php artisan optimize
 
       - name: Create Pull Request to Main
-        uses: repo-sync/pull-request@v2
+        uses: peter-evans/create-pull-request@v6
         with:
-          source_branch: "staging"
-          destination_branch: "main"
-          pr_title: "🚀 [Auto-PR] New updates from Staging"
-          pr_body: "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge."
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          branch: "staging-updates"
+          base: "main"
+          title: "🚀 [Auto-PR] New updates from Staging"
+          body: "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge."
+          token: ${{ github.token }}
+          delete-branch: true
