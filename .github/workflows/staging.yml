@@ -32,6 +32,7 @@ jobs:
         run: |
           npm install --legacy-peer-deps
           npm run build
+          rm -rf node_modules # ⚡️ CRITICAL: Remove node_modules to avoid Disk Quota Exceeded
         env:
           VITE_PUSHER_APP_KEY: ${{ secrets.VITE_PUSHER_APP_KEY }}
           VITE_PUSHER_APP_CLUSTER: ${{ secrets.VITE_PUSHER_APP_CLUSTER }}
@@ -53,7 +54,7 @@ jobs:
           username: ${{ secrets.WHOGOHOST_SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
-          source: "."
+          source: "./*"
           target: "/home/forahiao/public_html/ecotrack_staging.forahia.org.ng"
           rm: false 
           strip_components: 0
