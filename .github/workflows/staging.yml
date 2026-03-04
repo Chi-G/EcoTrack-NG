@@ -83,11 +83,18 @@ jobs:
             php artisan optimize
 
       - name: Create Pull Request to Main
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          branch: "staging-to-main"
-          base: "main"
-          title: "🚀 [Auto-PR] New updates from Staging"
-          body: "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge."
-          delete-branch: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "🔍 Checking for existing PR..."
+          PR_EXISTS=$(gh pr list --base main --head staging --json number --jq '.[0].number')
+          
+          if [ -z "$PR_EXISTS" ]; then
+            echo "🚀 Creating new PR..."
+            gh pr create --title "🚀 [Auto-PR] New updates from Staging" \
+                         --body "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge." \
+                         --base main \
+                         --head staging
+          else
+            echo "✅ PR #$PR_EXISTS already exists. No new PR needed."
+          fi
