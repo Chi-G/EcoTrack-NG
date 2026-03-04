@@ -79,7 +79,7 @@ jobs:
           script: |
             cd /home/forahiao/public_html/ecotrack_staging.forahia.org.ng
             unzip -o staging_deploy.zip && rm staging_deploy.zip
-            php artisan migrate --force
+            php artisan migrate --force --seed
             php artisan optimize
 
       - name: Create Pull Request to Main
