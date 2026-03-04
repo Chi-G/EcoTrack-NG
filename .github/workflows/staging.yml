@@ -72,3 +72,5 @@ jobs:
           pr_title: "🚀 [Auto-PR] New updates from Staging"
           pr_body: "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge."
           github_token: ${{ secrets.GH_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
