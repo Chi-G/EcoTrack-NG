@@ -1,14 +1,14 @@
-# Deploy to WhoGoHost - EcoTrack-NG Production
-name: Deploy to Production
+# Deploy to WhoGoHost - EcoTrack-NG Staging & Auto-PR
+name: Deploy to Staging
 
 on:
   push:
-    branches: [ main ]
+    branches: [ staging ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
+    environment: staging
     steps:
       - uses: actions/checkout@v4
 
@@ -44,7 +44,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
           source: "."
-          target: "/home/forahiao/public_html/ecotrack.forahia.org.ng"
+          target: "/home/forahiao/public_html/ecotrack_staging.forahia.org.ng"
           rm: false 
           strip_components: 0
           ignore_list: ".git*,node_modules,storage/*.key,storage/logs/*.log,.env"
@@ -57,10 +57,18 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
           script: |
-            cd /home/forahiao/public_html/ecotrack.forahia.org.ng
+            cd /home/forahiao/public_html/ecotrack_staging.forahia.org.ng
             php artisan migrate --force
-            php artisan cache:clear
+            php artisan optimize:clear
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            php artisan optimize
+
+      - name: Create Pull Request to Main
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "staging"
+          destination_branch: "main"
+          pr_title: "🚀 [Auto-PR] New updates from Staging"
+          pr_body: "Automated PR from Staging to Main. Code has been deployed to staging and is ready for production merge."
+          github_token: ${{ secrets.GH_TOKEN }}
