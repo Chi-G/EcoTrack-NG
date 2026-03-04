@@ -51,9 +51,10 @@ jobs:
             echo "📊 Checking Disk & Inodes..."
             df -h | grep "/home/forahiao" || df -h
             df -i | grep "/home/forahiao" || df -i
-            echo "🧹 Clearing target directory..."
+            echo "🧹 Clearing target directory (preserving .env)..."
             mkdir -p /home/forahiao/public_html/ecotrack.forahia.org.ng
-            cd /home/forahiao/public_html/ecotrack.forahia.org.ng && rm -rf *
+            cd /home/forahiao/public_html/ecotrack.forahia.org.ng
+            find . -maxdepth 1 ! -name '.env' ! -name '.' -exec rm -rf {} +
 
       - name: Upload Deployment Archive
         uses: appleboy/scp-action@v0.1.7
