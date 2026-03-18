@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import {
@@ -245,7 +245,7 @@ export default function Dashboard({ auth, center, inventory, recentDeliveries, p
                                         <Clock className="w-5 h-5 text-emerald-500" />
                                         Inbound History
                                     </h3>
-                                    <button className="text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-600 transition-colors">View All Logs</button>
+                                    <Link href={route('recycler.history')} className="text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:text-emerald-600 transition-colors">View All Logs</Link>
                                 </div>
 
                                 <div className="bg-white dark:bg-gray-800/40 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/30 overflow-hidden backdrop-blur-sm shadow-sm">

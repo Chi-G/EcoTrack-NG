@@ -76,4 +76,25 @@ class RecyclerDashboardController extends Controller
             'stats' => $stats,
         ]);
     }
+
+    public function history()
+    {
+        $user = Auth::user();
+        $center = $user->recyclingCenter;
+
+        if (!$center) {
+            return redirect()->route('recycler.dashboard');
+        }
+
+        $deliveries = WastePickup::with(['collector', 'category', 'resident'])
+            ->where('recycling_center_id', $center->id)
+            ->whereNotNull('delivered_at')
+            ->latest('delivered_at')
+            ->paginate(15);
+
+        return Inertia::render('Recycler/History', [
+            'center' => $center,
+            'deliveries' => $deliveries,
+        ]);
+    }
 }
