@@ -59,6 +59,7 @@ Route::middleware(['auth', 'verified', 'role:collector'])->prefix('collector')->
 
 Route::middleware(['auth', 'verified', 'role:recycler'])->prefix('recycler')->name('recycler.')->group(function () {
     Route::get('/dashboard', [RecyclerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/history', [RecyclerDashboardController::class, 'history'])->name('history');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
