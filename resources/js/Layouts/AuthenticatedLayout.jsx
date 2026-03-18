@@ -128,7 +128,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <div className="flex flex-col">
                                     <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">Eco Wealth</span>
                                     <span className="text-sm font-black text-emerald-900 dark:text-white leading-tight">
-                                        {user.points?.toLocaleString() || 0} <span className="text-[10px] font-bold opacity-60">PTS</span>
+                                        {Number(user.points || 0).toLocaleString()} <span className="text-[10px] font-bold opacity-60">PTS</span>
                                     </span>
                                 </div>
                             </motion.div>
