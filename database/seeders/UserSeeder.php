@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
+use App\Models\RecyclingCenter;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -12,11 +14,13 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $center = RecyclingCenter::first();
+
         // Define some core roles to ensure we always have at least one of each with specific emails
         $seedUsers = [
             ['email' => 'resident@ecotrack.com', 'name' => 'Default Resident', 'role' => 'resident'],
             ['email' => 'collector@ecotrack.com', 'name' => 'Default Collector', 'role' => 'collector'],
-            ['email' => 'recycler@ecotrack.com', 'name' => 'Default Recycler', 'role' => 'recycler'],
+            ['email' => 'recycler@ecotrack.com', 'name' => 'Default Recycler', 'role' => 'recycler', 'recycling_center_id' => $center?->id],
         ];
 
         foreach ($seedUsers as $u) {
@@ -27,6 +31,7 @@ class UserSeeder extends Seeder
                     'password' => bcrypt('password'),
                     'role' => $u['role'],
                     'email_verified_at' => now(),
+                    'recycling_center_id' => $u['recycling_center_id'] ?? null,
                 ]
             );
         }
@@ -41,7 +46,12 @@ class UserSeeder extends Seeder
         }
 
         if (User::where('role', 'recycler')->count() < 10) {
-            User::factory()->count(10)->recycler()->create();
+            $centers = RecyclingCenter::all();
+            User::factory()->count(10)->recycler()->create()->each(function ($user) use ($centers) {
+                if ($centers->count() > 0) {
+                    $user->update(['recycling_center_id' => $centers->random()->id]);
+                }
+            });
         }
     }
 }

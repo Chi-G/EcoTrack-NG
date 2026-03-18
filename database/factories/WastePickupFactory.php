@@ -18,6 +18,7 @@ class WastePickupFactory extends Factory
     {
         return [
             'status' => 'pending',
+            'recycling_center_id' => \App\Models\RecyclingCenter::factory(),
             'scheduled_at' => $this->faker->dateTimeBetween('now', '+1 month'),
             'weight_kg' => $this->faker->randomFloat(2, 0.5, 50),
         ];

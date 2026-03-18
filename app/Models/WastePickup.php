@@ -20,6 +20,8 @@ class WastePickup extends Model
         'weight_kg',
         'points_awarded',
         'verification_token',
+        'recycling_center_id',
+        'delivered_at',
     ];
 
     protected static function boot()
@@ -46,5 +48,10 @@ class WastePickup extends Model
     public function category()
     {
         return $this->belongsTo(WasteCategory::class, 'category_id');
+    }
+
+    public function recyclingCenter()
+    {
+        return $this->belongsTo(RecyclingCenter::class, 'recycling_center_id');
     }
 }

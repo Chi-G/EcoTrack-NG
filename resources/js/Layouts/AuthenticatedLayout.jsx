@@ -2,10 +2,10 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Link, usePage, router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf } from 'lucide-react';
+import { Leaf, Bell, X, Moon, Sun } from 'lucide-react';
 import OnlineStatus from '@/Components/OnlineStatus';
 
 export default function AuthenticatedLayout({ header, children }) {
@@ -20,10 +20,82 @@ export default function AuthenticatedLayout({ header, children }) {
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+    const [toast, setToast] = useState(null);
+
+    const [isDark, setIsDark] = useState(() => {
+        // Initial state from localStorage or system preference
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('theme');
+            if (saved) return saved === 'dark';
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        return false;
+    });
+
+    useEffect(() => {
+        const root = window.document.documentElement;
+        if (isDark) {
+            root.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            root.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [isDark]);
+
+    const toggleDarkMode = () => setIsDark(!isDark);
+
+    useEffect(() => {
+        if (window.Echo && user) {
+            const channel = window.Echo.private(`App.Models.User.${user.id}`);
+
+            channel.notification((notification) => {
+                setToast({
+                    title: notification.title || 'New Notification',
+                    message: notification.message || 'You have a new update.',
+                    type: notification.type
+                });
+
+                router.reload({ only: ['auth'] });
+
+                setTimeout(() => setToast(null), 5000);
+            });
+
+            return () => {
+                window.Echo.leave(`App.Models.User.${user.id}`);
+            };
+        }
+    }, [user?.id]);
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
             <OnlineStatus />
+
+            {/* Real-time Toast Notification */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, x: '-50%' }}
+                        animate={{ opacity: 1, y: 20, x: '-50%' }}
+                        exit={{ opacity: 0, y: -20, x: '-50%' }}
+                        className="fixed top-4 left-1/2 z-[200] w-full max-w-sm"
+                    >
+                        <div className="mx-4 bg-white dark:bg-gray-800 border-l-4 border-emerald-500 shadow-2xl rounded-2xl p-4 flex items-start gap-4 backdrop-blur-xl bg-white/90 dark:bg-gray-800/90">
+                            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                                <Bell className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h5 className="text-sm font-black text-gray-900 dark:text-white truncate">{toast.title}</h5>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">{toast.message}</p>
+                            </div>
+                            <button onClick={() => setToast(null)} className="text-gray-400 hover:text-gray-600">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <nav className="border-b border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800">
                 <div className="mx-auto max-w-[98%] px-4 sm:px-8 lg:px-12">
                     <div className="flex h-24 justify-between">
@@ -60,6 +132,77 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </span>
                                 </div>
                             </motion.div>
+
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleDarkMode}
+                                className="p-2.5 bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-emerald-500 rounded-2xl transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800/30 group"
+                                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                            >
+                                {isDark ? (
+                                    <Sun className="w-5 h-5 group-hover:rotate-45 transition-transform" />
+                                ) : (
+                                    <Moon className="w-5 h-5 group-hover:-rotate-12 transition-transform" />
+                                )}
+                            </button>
+
+                            <div className="relative">
+                                <Dropdown>
+                                    <Dropdown.Trigger>
+                                        <button className="relative p-2 text-gray-400 hover:text-emerald-500 transition-colors focus:outline-none group">
+                                            <Bell className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                                            {user.unread_notifications_count > 0 && (
+                                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 animate-pulse">
+                                                    {user.unread_notifications_count > 9 ? '9+' : user.unread_notifications_count}
+                                                </span>
+                                            )}
+                                        </button>
+                                    </Dropdown.Trigger>
+
+                                    <Dropdown.Content width="96">
+                                        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                                            <span className="font-bold text-gray-900 dark:text-white">Notifications</span>
+                                            {user.unread_notifications_count > 0 && (
+                                                <button
+                                                    onClick={() => router.post(route('api.notifications.mark-read'))}
+                                                    className="text-xs text-emerald-600 hover:text-emerald-500 font-semibold"
+                                                >
+                                                    Mark all as read
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="max-h-96 overflow-y-auto">
+                                            {user.notifications?.length > 0 ? (
+                                                user.notifications.map((notification) => (
+                                                    <div
+                                                        key={notification.id}
+                                                        className={`p-4 border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${!notification.read_at ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}`}
+                                                    >
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className="font-bold text-sm text-gray-900 dark:text-gray-100 italic">
+                                                                {notification.data.title}
+                                                            </span>
+                                                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                                                {notification.data.message}
+                                                            </p>
+                                                            <span className="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-tighter">
+                                                                {new Date(notification.created_at).toLocaleString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="p-8 text-center">
+                                                    <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                        <Bell className="w-6 h-6 text-gray-400" />
+                                                    </div>
+                                                    <p className="text-sm text-gray-500">No notifications yet</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Dropdown.Content>
+                                </Dropdown>
+                            </div>
 
                             <div className="relative">
                                 <Dropdown>
@@ -178,6 +321,20 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     </span>
                                                 </div>
                                             </div>
+
+                                            {/* Mobile Theme Toggle */}
+                                            <button
+                                                onClick={toggleDarkMode}
+                                                className="w-full flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl transition-all mb-4"
+                                            >
+                                                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-500 dark:text-gray-400">
+                                                    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                                                </div>
+                                                <div className="flex flex-col text-left">
+                                                    <span className="text-sm font-bold text-gray-900 dark:text-white">Theme</span>
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase">{isDark ? 'Light' : 'Dark'} Mode</span>
+                                                </div>
+                                            </button>
                                         </div>
                                         <ResponsiveNavLink
                                             href={route('dashboard')}

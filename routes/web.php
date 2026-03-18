@@ -5,9 +5,14 @@ use App\Http\Controllers\Api\RewardBalanceController;
 use App\Http\Controllers\Api\WastePickupController;
 use App\Http\Controllers\Api\LocationUpdateController;
 use App\Http\Controllers\Api\CollectorStatsController;
+use App\Http\Controllers\Api\RecyclingCenterController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Resident\ResidentDashboardController;
+use App\Http\Controllers\Recycler\RecyclerDashboardController;
 use App\Models\WasteCategory;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -27,14 +32,14 @@ Route::get('/dashboard', function () {
         return redirect()->route('recycler.dashboard');
     } elseif ($user->role === 'resident') {
         return redirect()->route('resident.dashboard');
+    } elseif ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
     }
     return redirect('/');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified', 'role:resident'])->prefix('resident')->name('resident.')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Resident/Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [ResidentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/history', function () {
         return Inertia::render('Resident/History');
     })->name('history');
@@ -53,9 +58,18 @@ Route::middleware(['auth', 'verified', 'role:collector'])->prefix('collector')->
 });
 
 Route::middleware(['auth', 'verified', 'role:recycler'])->prefix('recycler')->name('recycler.')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Recycler/Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [RecyclerDashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/centers', [AdminDashboardController::class, 'centers'])->name('centers');
+    Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
+    Route::post('/users/{user}/assign-center', [AdminDashboardController::class, 'assignUserToCenter'])->name('users.assign-center');
+    Route::delete('/users/{user}', [AdminDashboardController::class, 'deleteUser'])->name('users.delete');
+    
+    Route::put('/centers/{center}', [AdminDashboardController::class, 'updateCenter'])->name('centers.update');
+    Route::delete('/centers/{center}', [AdminDashboardController::class, 'deleteCenter'])->name('centers.delete');
 });
 
 Route::middleware('auth')->group(function () {
@@ -71,9 +85,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/rewards/balance', [RewardBalanceController::class, 'index']);
         Route::post('/rewards/redeem', [RewardBalanceController::class, 'redeem']);
         Route::get('/collector/stats', [CollectorStatsController::class, 'index']);
+        Route::patch('/waste-pickups/verify-any', [WastePickupController::class, 'verifyAny']);
         Route::patch('/waste-pickups/{waste_pickup}/verify', [WastePickupController::class, 'verify']);
+        Route::patch('/waste-pickups/{waste_pickup}/delivered', [WastePickupController::class, 'markAsDelivered']);
         Route::apiResource('waste-pickups', WastePickupController::class);
+        Route::apiResource('recycling-centers', RecyclingCenterController::class);
         Route::post('/location/update', [LocationUpdateController::class, 'update']);
+        Route::post('/notifications/mark-read', function (Request $request) {
+            $request->user()->unreadNotifications->markAsRead();
+            return back();
+        })->name('api.notifications.mark-read');
     });
 });
 

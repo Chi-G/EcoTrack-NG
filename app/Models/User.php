@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone_number',
         'address',
         'location',
+        'recycling_center_id',
     ];
 
     public function pickupsAsResident()
@@ -41,6 +42,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function rewards()
     {
         return $this->hasMany(Reward::class);
+    }
+
+    public function recyclingCenter()
+    {
+        return $this->belongsTo(RecyclingCenter::class, 'recycling_center_id');
     }
 
     /**

@@ -39,6 +39,8 @@ class HandleInertiaRequests extends Middleware
                     'role' => $request->user()->role,
                     'address' => $request->user()->address,
                     'points' => $request->user()->rewards()->sum('points'),
+                    'notifications' => $request->user()->notifications()->latest()->limit(5)->get(),
+                    'unread_notifications_count' => $request->user()->unreadNotifications()->count(),
                 ] : null,
             ],
         ];

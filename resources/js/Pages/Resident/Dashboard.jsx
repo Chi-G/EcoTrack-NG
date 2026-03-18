@@ -23,8 +23,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { QRCodeSVG } from 'qrcode.react';
+import DashboardChart from '@/Components/DashboardChart';
 
-export default function ResidentDashboard() {
+export default function ResidentDashboard({ analytics }) {
     const { auth } = usePage().props;
     const [scanning, setScanning] = useState(false);
     const [scanResult, setScanResult] = useState(null);
@@ -36,9 +37,10 @@ export default function ResidentDashboard() {
     });
     const [pickups, setPickups] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [centers, setCenters] = useState([]);
     const [isScheduling, setIsScheduling] = useState(false);
     const [schedulingLoading, setSchedulingLoading] = useState(false);
-    const [newPickup, setNewPickup] = useState({ category_id: '', scheduled_at: '', weight_kg: '' });
+    const [newPickup, setNewPickup] = useState({ category_id: '', recycling_center_id: '', scheduled_at: '', weight_kg: '' });
     const [selectedPickupForQR, setSelectedPickupForQR] = useState(null);
 
     const fileInputRef = useRef(null);
@@ -49,6 +51,15 @@ export default function ResidentDashboard() {
             setCategories(res.data || []);
         } catch (err) {
             console.error('Failed to fetch categories:', err);
+        }
+    };
+
+    const fetchCenters = async () => {
+        try {
+            const res = await axios.get('/api/recycling-centers');
+            setCenters(res.data.data || res.data || []);
+        } catch (err) {
+            console.error('Failed to fetch centers:', err);
         }
     };
 
@@ -77,6 +88,7 @@ export default function ResidentDashboard() {
     useEffect(() => {
         fetchDashboardData();
         fetchCategories();
+        fetchCenters();
     }, []);
 
     const handleSchedulePickup = async (e) => {
@@ -85,7 +97,7 @@ export default function ResidentDashboard() {
         try {
             await axios.post('/api/waste-pickups', newPickup);
             setIsScheduling(false);
-            setNewPickup({ category_id: '', scheduled_at: '', weight_kg: '' });
+            setNewPickup({ category_id: '', recycling_center_id: '', scheduled_at: '', weight_kg: '' });
             fetchDashboardData(); // Refresh list
         } catch (err) {
             console.error('Scheduling failed', err);
@@ -451,6 +463,27 @@ export default function ResidentDashboard() {
                         </div>
                     </div>
 
+                    {/* Analytics Section */}
+                    {analytics && analytics.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white dark:bg-gray-800 p-8 rounded-[40px] border border-gray-100 dark:border-gray-700 shadow-xl overflow-hidden relative group"
+                        >
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                                <div>
+                                    <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Your Impact</h3>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Waste collection trend over the last 7 days.</p>
+                                </div>
+                                <div className="flex bg-gray-50 dark:bg-gray-900 p-1 rounded-2xl">
+                                    <div className="px-4 py-2 bg-white dark:bg-gray-800 text-emerald-600 rounded-xl text-xs font-black shadow-sm">Collection</div>
+                                </div>
+                            </div>
+                            <DashboardChart data={analytics} />
+                        </motion.div>
+                    )}
+
                     {/* Recent Activity Timeline */}
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
@@ -562,11 +595,11 @@ export default function ResidentDashboard() {
                             </motion.div>
                         </Link>
                     </div>
-                </div >
-            </div >
+                </div>
+            </div>
 
             {/* Scheduling Modal */}
-            < AnimatePresence >
+            <AnimatePresence>
                 {isScheduling && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <motion.div
@@ -629,6 +662,21 @@ export default function ResidentDashboard() {
                                     </div>
 
                                     <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Recycling Center</label>
+                                        <select
+                                            required
+                                            value={newPickup.recycling_center_id}
+                                            onChange={(e) => setNewPickup({ ...newPickup, recycling_center_id: e.target.value })}
+                                            className="w-full h-14 px-6 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                                        >
+                                            <option value="">Select a center near you</option>
+                                            {centers.map(center => (
+                                                <option key={center.id} value={center.id}>{center.name} ({center.address})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-2">
                                         <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Preferred Date & Time</label>
                                         <div className="relative">
                                             <input
@@ -667,9 +715,8 @@ export default function ResidentDashboard() {
                             </div>
                         </motion.div>
                     </div>
-                )
-                }
-            </AnimatePresence >
+                )}
+            </AnimatePresence>
 
             {/* QR Code Modal for Verification */}
             <AnimatePresence>
@@ -702,9 +749,26 @@ export default function ResidentDashboard() {
                                 />
                             </div>
 
-                            <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl">
-                                <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Pickup ID</div>
-                                <div className="text-lg font-mono font-bold text-gray-900 dark:text-white">#{selectedPickupForQR.id}</div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl">
+                                    <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Pickup ID</div>
+                                    <div className="text-lg font-mono font-bold text-gray-900 dark:text-white">#{selectedPickupForQR.id}</div>
+                                </div>
+                                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-3xl">
+                                    <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">Category</div>
+                                    <div className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                        {selectedPickupForQR.category?.name || 'Waste'}
+                                    </div>
+                                </div>
+                                <div className="col-span-2 p-4 bg-orange-50 dark:bg-orange-900/10 rounded-3xl">
+                                    <div className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1">Scheduled For</div>
+                                    <div className="text-sm font-black text-gray-900 dark:text-white">
+                                        {new Date(selectedPickupForQR.scheduled_at).toLocaleString([], {
+                                            weekday: 'short', month: 'short', day: 'numeric',
+                                            hour: '2-digit', minute: '2-digit'
+                                        })}
+                                    </div>
+                                </div>
                             </div>
 
                             <button
@@ -717,6 +781,6 @@ export default function ResidentDashboard() {
                     </div>
                 )}
             </AnimatePresence>
-        </AuthenticatedLayout >
+        </AuthenticatedLayout>
     );
 }
