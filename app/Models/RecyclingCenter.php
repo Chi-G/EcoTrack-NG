@@ -13,6 +13,8 @@ class RecyclingCenter extends Model
     protected $fillable = [
         'name',
         'address',
+        'latitude',
+        'longitude',
         'location',
         'contact_number',
         'operating_hours',
