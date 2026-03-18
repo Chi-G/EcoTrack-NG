@@ -23,6 +23,7 @@ class SchedulePickupRequest extends FormRequest
     {
         return [
             'category_id' => 'required|exists:waste_categories,id',
+            'recycling_center_id' => 'required|exists:recycling_centers,id',
             'scheduled_at' => 'required|date|after:now',
             'weight_kg' => 'nullable|numeric|min:0.1',
         ];

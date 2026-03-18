@@ -122,15 +122,24 @@ export default function CollectorDashboard() {
     };
 
     const handleVerifyPickup = async (pickupId, token) => {
-        setUpdatingId(pickupId);
+        setUpdatingId(pickupId || 'general');
         try {
-            const res = await axios.patch(`/api/waste-pickups/${pickupId}/verify`, {
+            const url = pickupId
+                ? `/api/waste-pickups/${pickupId}/verify`
+                : '/api/waste-pickups/verify-any';
+
+            const res = await axios.patch(url, {
                 token: token
             });
+
             if (res.data.success) {
                 setIsScanning(false);
                 setScannerPickup(null);
                 await fetchDashboardData();
+                // If it was a general scan, we might want to show which one was completed
+                if (!pickupId && res.data.message) {
+                    alert(res.data.message);
+                }
             }
         } catch (err) {
             console.error('Verification failed:', err);
@@ -142,7 +151,7 @@ export default function CollectorDashboard() {
 
     useEffect(() => {
         let html5QrCode;
-        if (isScanning && scannerPickup) {
+        if (isScanning) {
             html5QrCode = new Html5Qrcode("reader");
             const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
 
@@ -150,7 +159,7 @@ export default function CollectorDashboard() {
                 { facingMode: "environment" },
                 qrConfig,
                 (decodedText) => {
-                    handleVerifyPickup(scannerPickup.id, decodedText);
+                    handleVerifyPickup(scannerPickup?.id, decodedText);
                     html5QrCode.stop().catch(err => console.error("Failed to stop scanner", err));
                 },
                 (errorMessage) => {
@@ -165,7 +174,7 @@ export default function CollectorDashboard() {
                 html5QrCode.stop().catch(err => console.error("Failed to stop scanner in cleanup", err));
             }
         };
-    }, [isScanning, scannerPickup]);
+    }, [isScanning]);
 
     const availableJobs = pickups.filter(p => p.status === 'pending');
     const myActiveRoute = pickups.filter(p => p.collector_id === auth.user.id && p.status !== 'completed');
@@ -322,8 +331,23 @@ export default function CollectorDashboard() {
                                     <Truck className="text-blue-500" size={20} />
                                 </div>
                                 <h3 className="text-xl font-black text-gray-900 dark:text-white">Live Route</h3>
-                                <div className="ml-auto px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
-                                    {myActiveRoute.length} Active
+                                <div className="ml-auto flex items-center gap-3">
+                                    {myActiveRoute.length > 0 && (
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => {
+                                                setScannerPickup(null);
+                                                setIsScanning(true);
+                                            }}
+                                            className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                                        >
+                                            <QrCode size={14} /> Quick Scan
+                                        </motion.button>
+                                    )}
+                                    <div className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                                        {myActiveRoute.length} Active
+                                    </div>
                                 </div>
                             </div>
 
@@ -445,23 +469,23 @@ export default function CollectorDashboard() {
                                                     <button
                                                         onClick={() => handleUpdateStatus(pickup.id, 'in_transit')}
                                                         disabled={updatingId === pickup.id}
-                                                        className="col-span-2 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-2xl font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50"
+                                                        className="flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-2xl font-bold text-sm hover:bg-blue-700 transition-all disabled:opacity-50"
                                                     >
                                                         <Navigation size={16} />
                                                         Begin Navigation
                                                     </button>
                                                 )}
-                                                {pickup.status === 'in_transit' && (
+                                                {(pickup.status === 'in_transit' || pickup.status === 'assigned') && (
                                                     <button
                                                         onClick={() => {
                                                             setScannerPickup(pickup);
                                                             setIsScanning(true);
                                                         }}
                                                         disabled={updatingId === pickup.id}
-                                                        className="col-span-2 flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-sm hover:bg-emerald-700 transition-all disabled:opacity-50"
+                                                        className={`${pickup.status === 'assigned' ? 'col-span-1' : 'col-span-2'} flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-sm hover:bg-emerald-700 transition-all disabled:opacity-50`}
                                                     >
                                                         <QrCode size={16} />
-                                                        Scan QR to Verify
+                                                        Scan QR
                                                     </button>
                                                 )}
                                             </div>

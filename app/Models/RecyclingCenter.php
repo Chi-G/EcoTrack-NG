@@ -22,4 +22,19 @@ class RecyclingCenter extends Model
     {
         return $this->hasMany(IoTSensor::class);
     }
+
+    public function collectors()
+    {
+        return $this->hasMany(User::class, 'recycling_center_id')->where('role', 'collector');
+    }
+
+    public function recyclers()
+    {
+        return $this->hasMany(User::class, 'recycling_center_id')->where('role', 'recycler');
+    }
+
+    public function pickups()
+    {
+        return $this->hasMany(WastePickup::class, 'recycling_center_id');
+    }
 }
