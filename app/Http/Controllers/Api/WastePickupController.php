@@ -296,10 +296,6 @@ class WastePickupController extends Controller
         $wastePickup->collector->notify(new WasteNotification($wastePickup, 'delivered', "Waste from {$wastePickup->resident->name} has been received by the recycling center."));
         $wastePickup->resident->notify(new WasteNotification($wastePickup, 'delivered', "Your waste has been successfully delivered to the recycling center."));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Delivery received and verified successfully.',
-            'data' => $wastePickup->load(['collector', 'category', 'recyclingCenter']),
-        ]);
+        return back()->with('success', 'Delivery received and verified successfully.');
     }
 }

@@ -12,8 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Enums in MySQL are tricky to update via Schema builder without losing data or changing defaults
-        // Using a raw statement is safer for adding a value to the list
         DB::statement("ALTER TABLE waste_pickups MODIFY COLUMN status ENUM('pending', 'assigned', 'in_transit', 'completed', 'cancelled', 'delivered') NOT NULL DEFAULT 'pending'");
     }
 
