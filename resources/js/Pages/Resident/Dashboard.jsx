@@ -41,6 +41,8 @@ export default function ResidentDashboard({ analytics }) {
     const [isScheduling, setIsScheduling] = useState(false);
     const [schedulingLoading, setSchedulingLoading] = useState(false);
     const [newPickup, setNewPickup] = useState({ category_id: '', recycling_center_id: '', scheduled_at: '', weight_kg: '' });
+    const [pickupDate, setPickupDate] = useState('');
+    const [pickupTime, setPickupTime] = useState('08:00');
     const [selectedPickupForQR, setSelectedPickupForQR] = useState(null);
 
     const fileInputRef = useRef(null);
@@ -95,10 +97,16 @@ export default function ResidentDashboard({ analytics }) {
         e.preventDefault();
         setSchedulingLoading(true);
         try {
-            await axios.post('/api/waste-pickups', newPickup);
+            await axios.post('/api/waste-pickups', {
+                ...newPickup,
+                scheduled_at: `${pickupDate} ${pickupTime}`
+            });
             setIsScheduling(false);
+            setScanResult(null);
             setNewPickup({ category_id: '', recycling_center_id: '', scheduled_at: '', weight_kg: '' });
-            fetchDashboardData(); // Refresh list
+            setPickupDate('');
+            setPickupTime('08:00');
+            fetchDashboardData(); 
         } catch (err) {
             console.error('Scheduling failed', err);
             alert('Failed to schedule pickup. Please check your inputs.');
@@ -164,6 +172,16 @@ export default function ResidentDashboard({ analytics }) {
 
     const triggerScanner = () => {
         fileInputRef.current?.click();
+    };
+
+    const handleConfirmFromScan = () => {
+        if (!scanResult) return;
+        setNewPickup(prev => ({
+            ...prev,
+            category_id: scanResult.category.id,
+            weight_kg: scanResult.weight || ''
+        }));
+        setIsScheduling(true);
     };
 
     return (
@@ -412,14 +430,25 @@ export default function ResidentDashboard({ analytics }) {
                                                 </div>
                                             </div>
 
-                                            <div className="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-3xl space-y-2">
-                                                <div className="text-gray-500 text-sm font-medium">Estimated Value:</div>
-                                                <div className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                                    {scanResult.category.points_per_kg} pts <span className="text-sm font-normal text-gray-400">/ per kg</span>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-3xl space-y-2">
+                                                    <div className="text-gray-500 text-sm font-medium">Estimated Value</div>
+                                                    <div className="text-xl font-bold text-gray-900 dark:text-white">
+                                                        {scanResult.category.points_per_kg} pts <span className="text-xs font-normal text-gray-400">/kg</span>
+                                                    </div>
+                                                </div>
+                                                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl space-y-2 border border-blue-100/50 dark:border-blue-800/20">
+                                                    <div className="text-blue-600 dark:text-blue-400 text-sm font-medium">Est. Weight</div>
+                                                    <div className="text-xl font-bold text-gray-900 dark:text-white">
+                                                        {scanResult.weight || 0} <span className="text-xs font-normal text-gray-400">kg</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <button className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all">
+                                            <button
+                                                onClick={handleConfirmFromScan}
+                                                className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all"
+                                            >
                                                 Confirm & Schedule Pickup
                                             </button>
                                         </motion.div>
@@ -676,14 +705,27 @@ export default function ResidentDashboard({ analytics }) {
                                         </select>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Preferred Date & Time</label>
-                                        <div className="relative">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Pickup Date</label>
                                             <input
                                                 required
-                                                type="datetime-local"
-                                                value={newPickup.scheduled_at}
-                                                onChange={(e) => setNewPickup({ ...newPickup, scheduled_at: e.target.value })}
+                                                type="date"
+                                                min={new Date().toISOString().split('T')[0]}
+                                                value={pickupDate}
+                                                onChange={(e) => setPickupDate(e.target.value)}
+                                                className="w-full h-14 px-6 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-gray-400 uppercase tracking-widest pl-2">Time (8am - 6pm)</label>
+                                            <input
+                                                required
+                                                type="time"
+                                                min="08:00"
+                                                max="18:00"
+                                                value={pickupTime}
+                                                onChange={(e) => setPickupTime(e.target.value)}
                                                 className="w-full h-14 px-6 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold"
                                             />
                                         </div>

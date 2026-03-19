@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\WastePickupController;
 use App\Http\Controllers\Api\LocationUpdateController;
 use App\Http\Controllers\Api\CollectorStatsController;
 use App\Http\Controllers\Api\RecyclingCenterController;
+use App\Http\Controllers\Api\WasteClassificationController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Resident\ResidentDashboardController;
 use App\Http\Controllers\Recycler\RecyclerDashboardController;
@@ -92,6 +94,8 @@ Route::middleware('auth')->group(function () {
         Route::apiResource('waste-pickups', WastePickupController::class);
         Route::apiResource('recycling-centers', RecyclingCenterController::class);
         Route::post('/location/update', [LocationUpdateController::class, 'update']);
+        Route::post('/waste/classify', [WasteClassificationController::class, 'classify']);
+        Route::post('/ai/chat', [ChatController::class, 'chat']);
         Route::post('/notifications/mark-read', function (Request $request) {
             $request->user()->unreadNotifications->markAsRead();
             return back();

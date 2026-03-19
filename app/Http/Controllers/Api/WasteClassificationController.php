@@ -22,7 +22,7 @@ class WasteClassificationController extends Controller
     public function classify(Request $request)
     {
         $request->validate([
-            'image' => 'required|string', // Base64 string
+            'image' => 'required|string',
         ]);
 
         try {
@@ -40,6 +40,7 @@ class WasteClassificationController extends Controller
                     ],
                     'confidence' => $result['confidence'],
                     'label' => $result['label'],
+                    'weight' => $result['weight'] ?? 0.0,
                     'is_mock' => $result['is_mock'] ?? false,
                 ]);
             }
