@@ -130,7 +130,7 @@ class AiService
             'category' => $random,
             'confidence' => 0.95,
             'label' => 'Mocked ' . $random->name,
-            'weight' => 1.5, // Default mock weight
+            'weight' => 1.5,
             'is_mock' => true
         ];
     }
