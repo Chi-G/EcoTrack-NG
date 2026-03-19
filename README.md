@@ -12,7 +12,7 @@ EcoTrack-NG is a cutting-edge, enterprise-grade platform designed to revolutioni
 
 ## 🚀 Key Features
 
-- **🧠 AI Waste Classification**: Real-time identification of recyclables (Plastic, Metal, Glass, etc.) using Google Vision AI.
+- **🧠 AI Waste Classification**: Real-time identification of recyclables (Plastic, Metal, Glass, etc.) using **Gemini 1.5 Flash (Google AI Studio)**.
 - **💰 Waste-to-Wealth Rewards**: Earn digital tokens for every gram of waste recycled, redeemable for various incentives.
 - **⚡ Real-time Connectivity**: Live notifications for pickup requests, verifications, and point awards via Pusher.
 - **🚛 Geospatial Logistics**: Smart routing and territory management for collectors to optimize recovery.
@@ -27,7 +27,7 @@ EcoTrack-NG is a cutting-edge, enterprise-grade platform designed to revolutioni
 - **Frontend**: React 18, Inertia.js, Vite
 - **Styling**: Tailwind CSS & Framer Motion (Premium Animations)
 - **Real-time**: Pusher (WebSockets)
-- **AI/ML**: Google Cloud Vision API
+- **AI/ML**: Gemini 1.5 Flash API (Google AI Studio)
 - **Maps**: Google Maps Platform (JavaScript API)
 - **Icons**: Lucide React
 - **Database**: MySQL (with Geospatial query support)
@@ -40,7 +40,7 @@ EcoTrack-NG is a cutting-edge, enterprise-grade platform designed to revolutioni
 EcoTrack-NG utilizes a modern **Monolithic Architecture** with a decoupled frontend. Laravel serves as the robust API and routing engine, while React handles the dynamic UI via Inertia.js, providing a seamless SPA experience without the complexity of a separate API layer.
 
 ### Core Services
-- **Vision Service**: Interfaces with Google Cloud Vision for intelligent waste category detection.
+- **Vision Service**: Interfaces with **Gemini 1.5 Flash** for intelligent waste category detection and weight estimation.
 - **Logistics Engine**: Manages territory-based assignments and collector availability.
 - **Reward Engine**: Atomic transaction processing for point allocation and balance management.
 - **Notification Hub**: Handles multi-channel event broadcasting (Web, Push).

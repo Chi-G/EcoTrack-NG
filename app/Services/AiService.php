@@ -12,92 +12,103 @@ class AiService
 
     public function __construct()
     {
-        $this->apiKey = (string) config('services.google.vision_key', '');
+        $this->apiKey = (string) config('services.google.ai_key', env('GOOGLE_AI_API_KEY', ''));
     }
 
     /**
-     * Classify waste from a base64 encoded image or URL.
-     *
-     * @param string $imageContent Base64 or URL
-     * @return array|null
+     * Classify waste using Gemini 1.5 Flash.
      */
     public function classifyWaste(string $imageContent): ?array
     {
         if (empty($this->apiKey)) {
-            Log::warning('Google Vision API key is missing. Using mock classification.');
+            Log::warning('Gemini AI API key is missing. Using mock classification.');
             return $this->getMockClassification();
         }
 
         try {
-            $response = Http::post("https://vision.googleapis.com/v1/images:annotate?key={$this->apiKey}", [
-                'requests' => [
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$this->apiKey}", [
+                'contents' => [
                     [
-                        'image' => [
-                            'content' => $this->prepareImage($imageContent),
-                        ],
-                        'features' => [
-                            ['type' => 'LABEL_DETECTION', 'maxResults' => 10],
-                        ],
-                    ],
-                ],
+                        'parts' => [
+                            [
+                                'text' => "Classify the waste in this image into exactly one of these categories: plastic, paper, glass, metal, organic, e-waste. Also, estimate the weight of the waste in kilograms (e.g., 0.5, 1.2, 5.0) based on typical density and volume. Return ONLY a valid JSON object with 'category' and 'weight' keys. Example: {\"category\": \"plastic\", \"weight\": 0.5}"
+                            ],
+                            [
+                                'inline_data' => [
+                                    'mime_type' => 'image/jpeg',
+                                    'data' => $this->prepareImage($imageContent)
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
             ]);
 
             if ($response->successful()) {
-                $labels = $response->json('responses.0.labelAnnotations');
-                return $this->mapLabelsToCategory($labels);
+                $rawText = $response->json('candidates.0.content.parts.0.text');
+                
+                // Extract JSON if Gemini wraps it in markdown code blocks
+                if (preg_match('/```json\s*(.*?)\s*```/s', $rawText, $matches)) {
+                    $rawText = $matches[1];
+                }
+                
+                $data = json_decode(trim($rawText), true);
+                $categorySlug = isset($data['category']) ? trim(strtolower($data['category'])) : 'unknown';
+                $weight = isset($data['weight']) ? (float)$data['weight'] : 0.0;
+                
+                $category = WasteCategory::where('slug', $categorySlug)->first();
+                if ($category) {
+                    return [
+                        'category' => $category,
+                        'confidence' => 0.99,
+                        'label' => ucfirst($categorySlug),
+                        'weight' => $weight
+                    ];
+                }
+
+                return $this->fallbackMapping($categorySlug, $weight);
             }
 
-            Log::error('Google Vision API Error: ' . $response->body());
+            if ($response->status() === 403) {
+                Log::error('Gemini API Error: 403 Forbidden. Check if your API key is restricted or if your region is supported.');
+            } else {
+                Log::error('Gemini API Error: ' . $response->status() . ' - ' . $response->body());
+            }
         } catch (\Exception $e) {
             Log::error('AI Service Exception: ' . $e->getMessage());
         }
 
-        return null;
+        return $this->getMockClassification();
     }
 
-    /**
-     * Map Vision API labels to internal WasteCategories.
-     */
-    protected function mapLabelsToCategory(?array $labels): ?array
+    protected function fallbackMapping(string $text, float $weight = 0.0): ?array
     {
-        if (empty($labels)) return null;
-
-        $categoryMap = [
-            'plastic' => ['plastic', 'bottle', 'polyethylene', 'container'],
-            'paper' => ['paper', 'cardboard', 'newspaper', 'book'],
-            'glass' => ['glass', 'bottle', 'jar', 'transparent'],
-            'metal' => ['metal', 'aluminum', 'can', 'iron', 'steel'],
-            'organic' => ['food', 'fruit', 'vegetable', 'plant', 'organic'],
-            'e-waste' => ['electronic', 'battery', 'phone', 'computer', 'cable'],
-        ];
-
-        foreach ($labels as $label) {
-            $description = strtolower($label['description']);
-            
-            foreach ($categoryMap as $slug => $keywords) {
-                foreach ($keywords as $keyword) {
-                    if (str_contains($description, $keyword)) {
-                        $category = WasteCategory::where('slug', $slug)->first();
-                        if ($category) {
-                            return [
-                                'category' => $category,
-                                'confidence' => $label['score'],
-                                'label' => $label['description']
-                            ];
-                        }
-                    }
+        $categories = ['plastic', 'paper', 'glass', 'metal', 'organic', 'e-waste'];
+        foreach ($categories as $slug) {
+            if (str_contains($text, $slug)) {
+                $category = WasteCategory::where('slug', $slug)->first();
+                if ($category) {
+                    return [
+                        'category' => $category,
+                        'confidence' => 0.9,
+                        'label' => ucfirst($slug),
+                        'weight' => $weight
+                    ];
                 }
             }
         }
-
         return null;
     }
 
     protected function prepareImage(string $imageContent): string
     {
-        //check if it's already base64 or a path
         if (preg_match('/^data:image\/(\w+);base64,/', $imageContent)) {
             return preg_replace('/^data:image\/(\w+);base64,/', '', $imageContent);
+        }
+
+        // If it's a file path, read it and encode it
+        if (file_exists($imageContent)) {
+            return base64_encode(file_get_contents($imageContent));
         }
 
         return $imageContent;
@@ -106,12 +117,20 @@ class AiService
     protected function getMockClassification(): array
     {
         $categories = WasteCategory::all();
+        if ($categories->isEmpty()) {
+             return [
+                'category' => null,
+                'confidence' => 0,
+                'label' => 'No categories found'
+            ];
+        }
         $random = $categories->random();
 
         return [
             'category' => $random,
             'confidence' => 0.95,
             'label' => 'Mocked ' . $random->name,
+            'weight' => 1.5, // Default mock weight
             'is_mock' => true
         ];
     }

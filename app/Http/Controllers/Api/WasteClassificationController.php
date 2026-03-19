@@ -40,6 +40,7 @@ class WasteClassificationController extends Controller
                     ],
                     'confidence' => $result['confidence'],
                     'label' => $result['label'],
+                    'weight' => $result['weight'] ?? 0.0,
                     'is_mock' => $result['is_mock'] ?? false,
                 ]);
             }
