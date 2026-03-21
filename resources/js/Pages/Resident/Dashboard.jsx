@@ -528,37 +528,41 @@ export default function ResidentDashboard({ analytics }) {
                             {pickups.length > 0 ? (
                                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
                                     {pickups.slice(0, 5).map((pickup) => (
-                                        <div key={pickup.id} className="p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <div key={pickup.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center">
+                                                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                                                     <Recycle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                                                 </div>
-                                                <div>
-                                                    <div className="font-bold text-gray-900 dark:text-white">
+                                                <div className="min-w-0">
+                                                    <div className="font-bold text-gray-900 dark:text-white truncate">
                                                         {pickup.category?.name || 'Waste'} Recycling
                                                     </div>
-                                                    <div className="text-sm text-gray-500 flex items-center gap-3">
+                                                    <div className="text-sm text-gray-500 flex flex-wrap items-center gap-x-3 gap-y-1">
                                                         <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(pickup.scheduled_at).toLocaleDateString()}</span>
                                                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(pickup.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                {['assigned', 'in_transit'].includes(pickup.status) && (
-                                                    <button
-                                                        onClick={() => setSelectedPickupForQR(pickup)}
-                                                        className="px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 text-xs font-bold whitespace-nowrap"
-                                                    >
-                                                        <Smartphone size={16} />
-                                                        Show QR
-                                                    </button>
-                                                )}
-                                                <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(pickup.status)}`}>
-                                                    {pickup.status}
+
+                                            <div className="flex flex-wrap items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-gray-50 sm:border-0 dark:border-gray-700">
+                                                <div className="flex items-center gap-3 order-2 sm:order-1">
+                                                    {['assigned', 'in_transit'].includes(pickup.status) && (
+                                                        <button
+                                                            onClick={() => setSelectedPickupForQR(pickup)}
+                                                            className="px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap"
+                                                        >
+                                                            <Smartphone size={14} />
+                                                            Show QR
+                                                        </button>
+                                                    )}
+                                                    <div className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest ${getStatusColor(pickup.status)}`}>
+                                                        {pickup.status.replace('_', ' ')}
+                                                    </div>
                                                 </div>
-                                                <div className="text-right hidden sm:block">
-                                                    <div className="font-bold text-gray-900 dark:text-white">+{Number(pickup.points_awarded || 0).toLocaleString()} pts</div>
-                                                    <div className="text-xs text-gray-400">{Number(pickup.weight_kg || 0).toLocaleString()} kg</div>
+
+                                                <div className="text-left sm:text-right order-1 sm:order-2 min-w-[80px]">
+                                                    <div className="font-black text-emerald-600 dark:text-emerald-400 text-sm">+{Number(pickup.points_awarded || 0).toLocaleString()} <span className="text-[10px] opacity-60">PTS</span></div>
+                                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{Number(pickup.weight_kg || 0).toLocaleString()} kg</div>
                                                 </div>
                                             </div>
                                         </div>
