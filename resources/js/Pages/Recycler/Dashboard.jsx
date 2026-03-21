@@ -168,7 +168,7 @@ export default function Dashboard({ auth, center, inventory, recentDeliveries, p
                                                 </p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-black text-emerald-500">{cat.total_weight} <span className="text-[10px]">kg</span></p>
+                                                <p className="font-black text-emerald-500">{Number(cat.total_weight || 0).toLocaleString()} <span className="text-[10px]">kg</span></p>
                                             </div>
                                         </div>
                                         <div className="w-full bg-gray-100 dark:bg-gray-700/50 h-2 rounded-full overflow-hidden">

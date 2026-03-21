@@ -248,10 +248,63 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
-                        <div className="-me-2 flex items-center sm:hidden">
+                        <div className="-me-2 flex items-center gap-2 sm:hidden">
+                            {/* Mobile Notification Bell */}
+                            <div className="relative">
+                                <Dropdown>
+                                    <Dropdown.Trigger>
+                                        <button className="relative p-2 text-gray-400 hover:text-emerald-500 transition-colors focus:outline-none group">
+                                            <Bell className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                                            {user.unread_notifications_count > 0 && (
+                                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 animate-pulse">
+                                                    {user.unread_notifications_count > 9 ? '9+' : user.unread_notifications_count}
+                                                </span>
+                                            )}
+                                        </button>
+                                    </Dropdown.Trigger>
+
+                                    <Dropdown.Content width="80" align="right">
+                                        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                                            <span className="font-bold text-gray-900 dark:text-white text-sm">Notifications</span>
+                                            {user.unread_notifications_count > 0 && (
+                                                <button
+                                                    onClick={() => router.post(route('api.notifications.mark-read'))}
+                                                    className="text-[10px] text-emerald-600 hover:text-emerald-500 font-semibold uppercase tracking-wider"
+                                                >
+                                                    Mark all read
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="max-h-80 overflow-y-auto">
+                                            {user.notifications?.length > 0 ? (
+                                                user.notifications.map((notification) => (
+                                                    <div
+                                                        key={notification.id}
+                                                        className={`p-4 border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${!notification.read_at ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}`}
+                                                    >
+                                                        <div className="flex flex-col gap-1 text-left">
+                                                            <span className="font-bold text-xs text-gray-900 dark:text-gray-100 italic">
+                                                                {notification.data.title}
+                                                            </span>
+                                                            <p className="text-[10px] text-gray-600 dark:text-gray-400 line-clamp-2 leading-tight">
+                                                                {notification.data.message}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="p-8 text-center text-xs text-gray-500">
+                                                    No notifications
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Dropdown.Content>
+                                </Dropdown>
+                            </div>
+
                             <button
                                 onClick={() => setShowingNavigationDropdown(true)}
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400 dark:focus:bg-gray-900 dark:focus:text-gray-400"
+                                className="inline-flex items-center justify-center rounded-xl p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400 dark:focus:bg-gray-900 dark:focus:text-gray-400"
                             >
                                 <svg
                                     className="h-6 w-6"
@@ -317,7 +370,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 <div className="flex flex-col">
                                                     <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">Eco Wealth</span>
                                                     <span className="text-lg font-black text-emerald-900 dark:text-white leading-tight">
-                                                        {user.points?.toLocaleString() || 0} <span className="text-[10px] font-bold opacity-60">PTS</span>
+                                                        {Number(user.points || 0).toLocaleString()} <span className="text-[10px] font-bold opacity-60">PTS</span>
                                                     </span>
                                                 </div>
                                             </div>

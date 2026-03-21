@@ -106,7 +106,7 @@ export default function ResidentDashboard({ analytics }) {
             setNewPickup({ category_id: '', recycling_center_id: '', scheduled_at: '', weight_kg: '' });
             setPickupDate('');
             setPickupTime('08:00');
-            fetchDashboardData(); 
+            fetchDashboardData();
         } catch (err) {
             console.error('Scheduling failed', err);
             alert('Failed to schedule pickup. Please check your inputs.');
@@ -288,7 +288,7 @@ export default function ResidentDashboard({ analytics }) {
                                             </div>
                                         </div>
                                         <div className="text-left sm:text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                            Next Milestone: {stats.level?.nextMilestone?.toLocaleString()} PTS
+                                            Next Milestone: {Number(stats.level?.nextMilestone || 500).toLocaleString()} PTS
                                         </div>
                                     </div>
 
@@ -310,7 +310,7 @@ export default function ResidentDashboard({ analytics }) {
                                 <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-[32px] border border-blue-100 dark:border-blue-800/30">
                                     <div className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mb-1">Waste Diverted</div>
                                     <div className="text-2xl font-black text-gray-900 dark:text-white">
-                                        {pickups.reduce((acc, p) => acc + (parseFloat(p.weight_kg) || 0), 0).toFixed(1)} <span className="text-xs opacity-40">KG</span>
+                                        {Number(pickups.reduce((acc, p) => acc + (parseFloat(p.weight_kg) || 0), 0)).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-xs opacity-40">KG</span>
                                     </div>
                                 </div>
                             </div>
@@ -557,8 +557,8 @@ export default function ResidentDashboard({ analytics }) {
                                                     {pickup.status}
                                                 </div>
                                                 <div className="text-right hidden sm:block">
-                                                    <div className="font-bold text-gray-900 dark:text-white">+{pickup.points_awarded || 0} pts</div>
-                                                    <div className="text-xs text-gray-400">{pickup.weight_kg || '—'} kg</div>
+                                                    <div className="font-bold text-gray-900 dark:text-white">+{Number(pickup.points_awarded || 0).toLocaleString()} pts</div>
+                                                    <div className="text-xs text-gray-400">{Number(pickup.weight_kg || 0).toLocaleString()} kg</div>
                                                 </div>
                                             </div>
                                         </div>
