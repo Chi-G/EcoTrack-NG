@@ -22,7 +22,7 @@ export default function AdminDashboard({ stats, recentPickups, centers, analytic
     const [chartMode, setChartMode] = useState('collection');
 
     const statCards = [
-        { label: 'Total Waste Collected', value: `${Number(stats.total_waste_kg || 0).toFixed(1)} kg`, icon: Recycle, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+        { label: 'Total Waste Collected', value: `${Number(stats.total_waste_kg || 0).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kg`, icon: Recycle, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
         { label: 'Total Points Awarded', value: stats.total_points_awarded.toLocaleString(), icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
         { label: 'Active Residents', value: stats.active_residents, icon: Users, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
         { label: 'Fleet Size', value: stats.active_collectors, icon: Truck, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
