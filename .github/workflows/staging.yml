@@ -44,12 +44,13 @@ jobs:
           VITE_PUSHER_APP_CLUSTER: ${{ secrets.VITE_PUSHER_APP_CLUSTER }}
 
       - name: Server Disk Check & Nuclear Staging Cleanup
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_SSH_HOST }}
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           password: ${{ secrets.HOSTINGER_SSH_PASS }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
+          timeout: 60s
           debug: true
           script: |
             echo "📊 Checking Disk & Inodes..."
@@ -67,17 +68,19 @@ jobs:
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           password: ${{ secrets.HOSTINGER_SSH_PASS }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
+          timeout: 60s
           debug: true
           source: "staging_deploy.zip"
           target: "/home/u157985566/domains/forahia.com/public_html/ecotrack_staging"
 
       - name: Extract & Post-Deploy (Staging)
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HOSTINGER_SSH_HOST }}
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           password: ${{ secrets.HOSTINGER_SSH_PASS }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
+          timeout: 60s
           debug: true
           script: |
             cd /home/u157985566/domains/forahia.com/public_html/ecotrack_staging
