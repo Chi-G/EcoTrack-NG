@@ -4,7 +4,8 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { User, Truck, Recycle, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -12,6 +13,33 @@ export default function Login({ status, canResetPassword }) {
         password: '',
         remember: false,
     });
+
+    const { app_env } = usePage().props;
+
+    const CREDENTIALS = {
+        local: {
+            resident: { email: 'chijindu@gmail.com', password: 'password' },
+            collector: { email: 'collector@ecotrack.com', password: 'password' },
+            recycler: { email: 'wzieme@example.net', password: 'password' },
+            admin: { email: 'admin@ecotrack.com', password: 'password' },
+        },
+        production: {
+            resident: { email: 'chijindu.nwokeohuru@gmail.com', password: 'chibuike4u@ecotrack' },
+            collector: { email: 'chiji4collage@gmail.com', password: 'chibuike4u@ecotrack' },
+            recycler: { email: 'nwokeohuruchijindu@gmail.com', password: 'chibuike4u@ecotrack' },
+            admin: { email: 'ijeoma.nwokeohuru@gmail.com', password: 'chibuike4u@ecotrack' },
+        }
+    };
+
+    const handleQuickLogin = (role) => {
+        const env = app_env === 'production' ? 'production' : 'local';
+        const creds = CREDENTIALS[env][role];
+        setData({
+            ...data,
+            email: creds.email,
+            password: creds.password,
+        });
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -35,6 +63,56 @@ export default function Login({ status, canResetPassword }) {
                     {status}
                 </div>
             )}
+
+            {/* Quick Login Section */}
+            <div className="mb-8 p-4 rounded-2xl bg-white/50 border border-emerald-100/50 backdrop-blur-sm shadow-sm group">
+                <div className="flex items-center gap-2 mb-4 text-emerald-600">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Quick Access ({app_env})</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('resident')}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white border border-emerald-50 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all duration-300 group/btn"
+                    >
+                        <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600 group-hover/btn:bg-emerald-600 group-hover/btn:text-white transition-colors">
+                            <User className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-semibold text-secondary">Resident</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('collector')}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white border border-emerald-50 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all duration-300 group/btn"
+                    >
+                        <div className="p-2 rounded-lg bg-blue-100 text-blue-600 group-hover/btn:bg-blue-600 group-hover/btn:text-white transition-colors">
+                            <Truck className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-semibold text-secondary">Collector</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('recycler')}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white border border-emerald-50 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all duration-300 group/btn"
+                    >
+                        <div className="p-2 rounded-lg bg-amber-100 text-amber-600 group-hover/btn:bg-amber-600 group-hover/btn:text-white transition-colors">
+                            <Recycle className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-semibold text-secondary">Recycler</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('admin')}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white border border-emerald-50 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all duration-300 group/btn"
+                    >
+                        <div className="p-2 rounded-lg bg-purple-100 text-purple-600 group-hover/btn:bg-purple-600 group-hover/btn:text-white transition-colors">
+                            <ShieldCheck className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-semibold text-secondary">Admin</span>
+                    </button>
+                </div>
+            </div>
 
             <form onSubmit={submit}>
                 <div className="space-y-6">
