@@ -46,6 +46,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           password: ${{ secrets.HOSTINGER_SSH_PASS }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
+          debug: true
           script: |
             echo "📊 Checking Disk & Inodes..."
             df -h | grep "/home/u157985566" || df -h
@@ -62,6 +63,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           password: ${{ secrets.HOSTINGER_SSH_PASS }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
+          debug: true
           source: "deploy.zip"
           target: "/home/u157985566/domains/forahia.com/public_html/ecotrack"
 
@@ -72,6 +74,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           password: ${{ secrets.HOSTINGER_SSH_PASS }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
+          debug: true
           script: |
             cd /home/u157985566/domains/forahia.com/public_html/ecotrack
             unzip -o deploy.zip && rm deploy.zip
