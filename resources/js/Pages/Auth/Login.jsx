@@ -14,26 +14,12 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
-    const { app_env } = usePage().props;
-
-    const CREDENTIALS = {
-        local: {
-            resident: { email: 'chijindu@gmail.com', password: 'password' },
-            collector: { email: 'collector@ecotrack.com', password: 'password' },
-            recycler: { email: 'wzieme@example.net', password: 'password' },
-            admin: { email: 'admin@ecotrack.com', password: 'password' },
-        },
-        production: {
-            resident: { email: 'chijindu.nwokeohuru@gmail.com', password: 'chibuike4u@ecotrack' },
-            collector: { email: 'chiji4collage@gmail.com', password: 'chibuike4u@ecotrack' },
-            recycler: { email: 'nwokeohuruchijindu@gmail.com', password: 'chibuike4u@ecotrack' },
-            admin: { email: 'ijeoma.nwokeohuru@gmail.com', password: 'chibuike4u@ecotrack' },
-        }
-    };
+    const { app_env, quick_login_credentials } = usePage().props;
 
     const handleQuickLogin = (role) => {
-        const env = app_env === 'production' ? 'production' : 'local';
-        const creds = CREDENTIALS[env][role];
+        const creds = quick_login_credentials[role];
+        if (!creds) return;
+        
         setData({
             ...data,
             email: creds.email,

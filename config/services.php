@@ -43,4 +43,23 @@ return [
     'openroute' => [
         'key' => env('OPENROUTE_SERVICE_KEY'),
     ],
+
+    'quick_login' => [
+        'resident' => [
+            'email' => env('QUICK_LOGIN_RESIDENT_EMAIL'),
+            'password' => env('QUICK_LOGIN_RESIDENT_PASSWORD'),
+        ],
+        'collector' => [
+            'email' => env('QUICK_LOGIN_COLLECTOR_EMAIL'),
+            'password' => env('QUICK_LOGIN_COLLECTOR_PASSWORD'),
+        ],
+        'recycler' => [
+            'email' => env('QUICK_LOGIN_RECYCLER_EMAIL'),
+            'password' => env('QUICK_LOGIN_RECYCLER_PASSWORD'),
+        ],
+        'admin' => [
+            'email' => env('QUICK_LOGIN_ADMIN_EMAIL'),
+            'password' => env('QUICK_LOGIN_ADMIN_PASSWORD'),
+        ],
+    ],
 ];
