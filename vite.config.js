@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ command }) => {
     return {
-        base: command === 'build' ? 'https://forahia.com/ecotrack/build/' : '/',
+        base: command === 'build' ? '/ecotrack/build/' : '/',
         plugins: [
         laravel({
             input: 'resources/js/app.jsx',
