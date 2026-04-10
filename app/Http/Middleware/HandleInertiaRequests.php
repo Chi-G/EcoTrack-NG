@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                     'unread_notifications_count' => $request->user()->unreadNotifications()->count(),
                 ] : null,
             ],
+            'app_env' => config('app.env'),
         ];
     }
 }

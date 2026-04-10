@@ -1,4 +1,4 @@
-# Deploy to WhoGoHost - EcoTrack-NG Staging & Auto-PR
+# Deploy to Hostinger - EcoTrack-NG Staging & Auto-PR
 name: Deploy to Staging
 
 on:
@@ -12,7 +12,6 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: staging
     steps:
       - uses: actions/checkout@v4
 
@@ -47,38 +46,38 @@ jobs:
       - name: Server Disk Check & Nuclear Staging Cleanup
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.WHOGOHOST_SSH_HOST }}
-          username: ${{ secrets.WHOGOHOST_SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          password: ${{ secrets.HOSTINGER_SSH_PASS }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
           script: |
             echo "📊 Checking Disk & Inodes..."
-            df -h | grep "/home/forahiao" || df -h
-            df -i | grep "/home/forahiao" || df -i
+            df -h | grep "/home/u157985566" || df -h
+            df -i | grep "/home/u157985566" || df -i
             echo "🧹 Clearing staging directory (preserving .env)..."
-            mkdir -p /home/forahiao/public_html/ecotrack_staging.forahia.org.ng
-            cd /home/forahiao/public_html/ecotrack_staging.forahia.org.ng
+            mkdir -p /home/u157985566/domains/forahia.com/public_html/ecotrack_staging
+            cd /home/u157985566/domains/forahia.com/public_html/ecotrack_staging
             find . -maxdepth 1 ! -name '.env' ! -name '.' -exec rm -rf {} +
 
       - name: Upload Staging Archive
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.WHOGOHOST_SSH_HOST }}
-          username: ${{ secrets.WHOGOHOST_SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          password: ${{ secrets.HOSTINGER_SSH_PASS }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
           source: "staging_deploy.zip"
-          target: "/home/forahiao/public_html/ecotrack_staging.forahia.org.ng"
+          target: "/home/u157985566/domains/forahia.com/public_html/ecotrack_staging"
 
       - name: Extract & Post-Deploy (Staging)
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.WHOGOHOST_SSH_HOST }}
-          username: ${{ secrets.WHOGOHOST_SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.WHOGOHOST_SSH_PORT || 22 }}
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          password: ${{ secrets.HOSTINGER_SSH_PASS }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT || 65002 }}
           script: |
-            cd /home/forahiao/public_html/ecotrack_staging.forahia.org.ng
+            cd /home/u157985566/domains/forahia.com/public_html/ecotrack_staging
             unzip -o staging_deploy.zip && rm staging_deploy.zip
             php artisan migrate --force --seed
             php artisan optimize

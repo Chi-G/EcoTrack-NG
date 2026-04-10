@@ -11,7 +11,7 @@ export default function GuestLayout({ children }) {
             </div>
 
             <div className="mt-12 mb-4 flex flex-col items-center">
-                <Link href="/" className="hover-scale">
+                <Link href={route('home')} className="hover-scale">
                     <img src="/1-no-bg.png" alt="EcoTrack-NG Logo" className="w-32 h-32 object-contain" />
                 </Link>
             </div>
