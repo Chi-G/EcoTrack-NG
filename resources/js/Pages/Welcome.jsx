@@ -66,7 +66,7 @@ export default function Welcome({ auth }) {
             {/* Navigation */}
             <nav className="fixed top-0 w-full z-50 glass-nav h-24 flex items-center justify-between px-6 lg:px-20">
                 <div className="flex items-center gap-2">
-                    <Link href="/" className="flex items-center hover-scale">
+                    <Link href={route('home')} className="flex items-center hover-scale">
                         <img src="/1-no-bg.png" alt="EcoTrack-NG Logo" className="w-24 h-24 object-contain" />
                     </Link>
                 </div>

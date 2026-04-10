@@ -101,7 +101,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="flex h-24 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
+                                <Link href={route('home')}>
                                     <ApplicationLogo className="block h-24 w-auto object-contain" />
                                 </Link>
                             </div>

@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+    base: '/ecotrack/',
     plugins: [
         laravel({
             input: 'resources/js/app.jsx',
@@ -41,8 +42,8 @@ export default defineConfig({
                 background_color: '#ffffff',
                 display: 'standalone',
                 orientation: 'portrait',
-                scope: '/',
-                start_url: '/',
+                scope: '/ecotrack/',
+                start_url: '/ecotrack/',
                 icons: [
                     {
                         src: '/pwa-icon-512.png',
