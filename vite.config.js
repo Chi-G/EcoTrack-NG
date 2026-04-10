@@ -3,9 +3,10 @@ import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
-    base: '/ecotrack/',
-    plugins: [
+export default defineConfig(({ command }) => {
+    return {
+        base: command === 'build' ? '/ecotrack/build/' : '/',
+        plugins: [
         laravel({
             input: 'resources/js/app.jsx',
             refresh: true,
@@ -55,4 +56,5 @@ export default defineConfig({
             }
         })
     ],
+    };
 });

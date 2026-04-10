@@ -23,7 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Vite::useAssetUrl(config('app.asset_url'));
         Vite::prefetch(concurrency: 3);
         
         Event::listen(
