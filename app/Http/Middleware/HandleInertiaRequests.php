@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'app_env' => config('app.env'),
+            'asset_url' => config('app.asset_url') ?: config('app.url'),
             'quick_login_credentials' => config('services.quick_login'),
         ];
     }

@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Recycle,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 export default function Welcome({ auth }) {
+    const { asset_url } = usePage().props;
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -67,7 +68,7 @@ export default function Welcome({ auth }) {
             <nav className="fixed top-0 w-full z-50 glass-nav h-24 flex items-center justify-between px-6 lg:px-20">
                 <div className="flex items-center gap-2">
                     <Link href={route('home')} className="flex items-center hover-scale">
-                        <img src="/1-no-bg.png" alt="EcoTrack-NG Logo" className="w-24 h-24 object-contain" />
+                        <img src={`${asset_url}/1-no-bg.png`} alt="EcoTrack-NG Logo" className="w-24 h-24 object-contain" />
                     </Link>
                 </div>
 
@@ -152,7 +153,7 @@ export default function Welcome({ auth }) {
                         <div className="absolute -z-10 w-[500px] h-[500px] bg-emerald-300/20 blur-[100px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
                         <div className="glass-card rounded-[40px] p-2 rotate-2 hover:rotate-0 transition-transform duration-500">
                             <img
-                                src="/images/smart-bin.png"
+                                src={`${asset_url}/images/smart-bin.png`}
                                 alt="EcoTrack-NG Smart Recycling Node"
                                 className="rounded-[36px] w-full aspect-square object-cover shadow-2xl"
                             />
@@ -202,7 +203,7 @@ export default function Welcome({ auth }) {
                     <div className="order-2 lg:order-1 relative">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-4">
-                                <img src="/images/recycling-facility.png" className="rounded-3xl w-full h-64 object-cover shadow-lg" alt="Automated Recycling Facility" />
+                                <img src={`${asset_url}/images/recycling-facility.png`} className="rounded-3xl w-full h-64 object-cover shadow-lg" alt="Automated Recycling Facility" />
                                 <div className="glass-card p-6 rounded-3xl text-center">
                                     <div className="text-3xl font-bold text-primary">130+</div>
                                     <div className="text-sm text-text-muted">Tons Diverted</div>
@@ -213,7 +214,7 @@ export default function Welcome({ auth }) {
                                     <div className="text-3xl font-bold text-white">4.8/5</div>
                                     <div className="text-sm text-emerald-300">User Rating</div>
                                 </div>
-                                <img src="/images/smart-city-bin.png" className="rounded-3xl w-full h-64 object-cover shadow-lg" alt="City Resource Management" />
+                                <img src={`${asset_url}/images/smart-city-bin.png`} className="rounded-3xl w-full h-64 object-cover shadow-lg" alt="City Resource Management" />
                             </div>
                         </div>
                     </div>
@@ -327,7 +328,7 @@ export default function Welcome({ auth }) {
                                 <div className="absolute inset-0 bg-emerald-500/20 blur-[80px] rounded-full animate-pulse"></div>
                                 <div className="relative glass-card-solid p-4 rounded-[40px] border border-white/10 bg-white/5 backdrop-blur-3xl overflow-hidden shadow-2xl">
                                     <img
-                                        src="/images/waste-to-wealth.png"
+                                        src={`${asset_url}/images/waste-to-wealth.png`}
                                         alt="Waste to Wealth Token"
                                         className="w-full rounded-[32px] transform group-hover:scale-105 transition-transform duration-700"
                                     />
@@ -352,7 +353,7 @@ export default function Welcome({ auth }) {
             <footer className="py-12 px-6 lg:px-20 border-t border-gray-100 bg-white">
                 <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
                     <div className="flex items-center">
-                        <img src="/1-no-bg.png" alt="EcoTrack-NG Logo" className="w-16 h-16 object-contain" />
+                        <img src={`${asset_url}/1-no-bg.png`} alt="EcoTrack-NG Logo" className="w-16 h-16 object-contain" />
                     </div>
                     <p className="text-text-muted text-sm text-center">© 2026 Forahia Enterprise. Building a sustainable Africa.</p>
                     <div className="flex gap-8 text-sm font-medium text-text-muted">

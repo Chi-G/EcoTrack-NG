@@ -1,7 +1,8 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Recycle } from 'lucide-react';
 
 export default function GuestLayout({ children }) {
+    const { asset_url } = usePage().props;
     return (
         <div className="flex min-h-screen flex-col items-center pt-6 sm:justify-center sm:pt-0 relative overflow-hidden px-4">
             {/* Background decorative elements */}
@@ -12,7 +13,7 @@ export default function GuestLayout({ children }) {
 
             <div className="mt-12 mb-4 flex flex-col items-center">
                 <Link href={route('home')} className="hover-scale">
-                    <img src="/1-no-bg.png" alt="EcoTrack-NG Logo" className="w-32 h-32 object-contain" />
+                    <img src={`${asset_url}/1-no-bg.png`} alt="EcoTrack-NG Logo" className="w-32 h-32 object-contain" />
                 </Link>
             </div>
 
