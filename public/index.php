@@ -17,4 +17,12 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-$app->handleRequest(Request::capture());
+$request = Request::capture();
+
+// Fix for subdirectory deployment on LiteSpeed/Hostinger
+$prefix = '/ecotrack';
+if (str_starts_with($request->server->get('REQUEST_URI'), $prefix)) {
+    $request->server->set('REQUEST_URI', substr($request->server->get('REQUEST_URI'), strlen($prefix)) ?: '/');
+}
+
+$app->handleRequest($request);
