@@ -5,10 +5,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ command }) => {
     const isProd = command === 'build';
-    const subdirectory = isProd ? '/ecotrack/' : '/';
+    const subdirectory = '/ecotrack/';
+    const base = isProd ? `${subdirectory}build/` : '/';
     
     return {
-        base: isProd ? '/ecotrack/build/' : '/',
+        base: base,
         plugins: [
             laravel({
                 input: 'resources/js/app.jsx',

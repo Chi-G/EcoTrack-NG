@@ -27,10 +27,15 @@ class AppServiceProvider extends ServiceProvider
         $appUrl = config('app.url');
 
         if (app()->environment('production', 'staging')) {
+            // Ensure the subdirectory is included in the forced URL if it's missing but we're at the live domain
+            if (str_contains($appUrl, 'forahia.com') && !str_contains($appUrl, '/ecotrack')) {
+                $appUrl = rtrim($appUrl, '/') . '/ecotrack';
+            }
+
             URL::forceRootUrl($appUrl);
             config(['app.asset_url' => $appUrl]);
             
-            if (str_contains($appUrl, 'https')) {
+            if (str_starts_with($appUrl, 'https')) {
                 URL::forceScheme('https');
             }
         }
