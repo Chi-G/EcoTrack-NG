@@ -15,14 +15,14 @@ require __DIR__.'/../vendor/autoload.php';
 
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
 $request = Request::capture();
 
 // Fix for subdirectory deployment on LiteSpeed/Hostinger
+// We inform Laravel that the application is running in the /ecotrack subdirectory
+// This prevents Inertia from redirecting the browser URL to the root domain
 $prefix = '/ecotrack';
 if (str_starts_with($request->server->get('REQUEST_URI'), $prefix)) {
-    $request->server->set('REQUEST_URI', substr($request->server->get('REQUEST_URI'), strlen($prefix)) ?: '/');
+    $request->setBaseUrl($prefix);
 }
 
 $app->handleRequest($request);
