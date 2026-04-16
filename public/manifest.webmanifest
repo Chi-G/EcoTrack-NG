@@ -6,11 +6,11 @@
     "background_color": "#ffffff",
     "display": "standalone",
     "orientation": "portrait",
-    "scope": "/",
-    "start_url": "/",
+    "scope": "/ecotrack/",
+    "start_url": "/ecotrack/",
     "icons": [
         {
-            "src": "/pwa-icon-512.png",
+            "src": "/ecotrack/pwa-icon-512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
