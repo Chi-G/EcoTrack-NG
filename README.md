@@ -6,7 +6,7 @@
 
 EcoTrack-NG is a cutting-edge, enterprise-grade platform designed to revolutionize waste recovery in Nigeria. By connecting residents, collectors, and recyclers, we turn **Waste into Wealth** through AI-powered classification, real-time logistics, and a robust digital reward system.
 
-**[Live Demo: ecotrack.forahia.org.ng](https://ecotrack.forahia.org.ng)**
+**[Live Demo: ecotrack.laravel.cloud](https://ecotrack.laravel.cloud)**
 
 ---
 
@@ -136,7 +136,7 @@ sequenceDiagram
 
 ## 📄 Documentation & API
 
-- **[Interactive API (Swagger)](https://ecotrack.forahia.org.ng/api/documentation)**: Full system schema and endpoint documentation.
+- **[Interactive API (Swagger)](https://ecotrack.laravel.cloud/api/documentation)**: Full system schema and endpoint documentation.
 - For internal logic flowcharts and database ERDs, refer to the `.docs` foldere.
 
 ---

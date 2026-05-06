@@ -1,0 +1,10 @@
+{
+    "agents": [
+        "cursor"
+    ],
+    "cloud": false,
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch": false,
+    "sail": false
+}
