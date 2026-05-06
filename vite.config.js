@@ -1,12 +1,13 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
+    const env = loadEnv(mode, process.cwd(), '');
     const isProd = command === 'build';
-    const subdirectory = '/ecotrack/';
-    const base = isProd ? `${subdirectory}build/` : '/';
+    const subdirectory = env.VITE_SUBDIRECTORY || '/';
+    const base = isProd ? `${subdirectory.endsWith('/') ? subdirectory : subdirectory + '/'}build/` : '/';
     
     return {
         base: base,
