@@ -46,20 +46,20 @@ return [
 
     'quick_login' => [
         'resident' => [
-            'email' => env('QUICK_LOGIN_RESIDENT_EMAIL'),
-            'password' => env('QUICK_LOGIN_RESIDENT_PASSWORD'),
+            'email' => env('QUICK_LOGIN_RESIDENT_EMAIL', 'resident@ecotrack.com'),
+            'password' => env('QUICK_LOGIN_RESIDENT_PASSWORD', 'password'),
         ],
         'collector' => [
-            'email' => env('QUICK_LOGIN_COLLECTOR_EMAIL'),
-            'password' => env('QUICK_LOGIN_COLLECTOR_PASSWORD'),
+            'email' => env('QUICK_LOGIN_COLLECTOR_EMAIL', 'collector@ecotrack.com'),
+            'password' => env('QUICK_LOGIN_COLLECTOR_PASSWORD', 'password'),
         ],
         'recycler' => [
-            'email' => env('QUICK_LOGIN_RECYCLER_EMAIL'),
-            'password' => env('QUICK_LOGIN_RECYCLER_PASSWORD'),
+            'email' => env('QUICK_LOGIN_RECYCLER_EMAIL', 'recycler@ecotrack.com'),
+            'password' => env('QUICK_LOGIN_RECYCLER_PASSWORD', 'password'),
         ],
         'admin' => [
-            'email' => env('QUICK_LOGIN_ADMIN_EMAIL'),
-            'password' => env('QUICK_LOGIN_ADMIN_PASSWORD'),
+            'email' => env('QUICK_LOGIN_ADMIN_EMAIL', 'admin@ecotrack.com'),
+            'password' => env('QUICK_LOGIN_ADMIN_PASSWORD', 'password'),
         ],
     ],
 ];
