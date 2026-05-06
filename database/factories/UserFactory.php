@@ -23,9 +23,11 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $hasFaker = function_exists('fake') && class_exists(\Faker\Factory::class);
+
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $hasFaker ? fake()->name() : 'User '.Str::random(5),
+            'email' => $hasFaker ? fake()->unique()->safeEmail() : 'user.'.Str::random(8).'@example.com',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
