@@ -58,10 +58,13 @@ export default function DeleteUserForm({ className = '' }) {
                     please download any data or information that you wish to
                     retain.
                 </p>
+                <p className="mt-2 text-sm font-semibold text-red-600 dark:text-red-400">
+                    ⚠️ Note: Account actions are locked for this demo instance.
+                </p>
             </header>
 
-            <DangerButton onClick={confirmUserDeletion}>
-                Delete Account
+            <DangerButton onClick={confirmUserDeletion} disabled={true}>
+                Delete Account (Disabled)
             </DangerButton>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>

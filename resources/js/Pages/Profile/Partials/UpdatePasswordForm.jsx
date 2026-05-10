@@ -55,6 +55,9 @@ export default function UpdatePasswordForm({ className = '' }) {
                     Ensure your account is using a long, random password to stay
                     secure.
                 </p>
+                <p className="mt-2 text-sm font-semibold text-red-600 dark:text-red-400">
+                    ⚠️ Note: Password updates are locked for this demo instance.
+                </p>
             </header>
 
             <form onSubmit={updatePassword} className="mt-6 space-y-6">
@@ -72,8 +75,9 @@ export default function UpdatePasswordForm({ className = '' }) {
                             setData('current_password', e.target.value)
                         }
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
                         autoComplete="current-password"
+                        disabled
                     />
 
                     <InputError
@@ -91,8 +95,9 @@ export default function UpdatePasswordForm({ className = '' }) {
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
                         autoComplete="new-password"
+                        disabled
                     />
 
                     <InputError message={errors.password} className="mt-2" />
@@ -111,8 +116,9 @@ export default function UpdatePasswordForm({ className = '' }) {
                             setData('password_confirmation', e.target.value)
                         }
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
                         autoComplete="new-password"
+                        disabled
                     />
 
                     <InputError
@@ -122,7 +128,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={true}>Save (Disabled)</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
