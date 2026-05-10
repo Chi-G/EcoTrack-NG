@@ -15,6 +15,9 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        // Hardcoded block for the demo.
+        return back()->with('error', 'Changing passwords is disabled in the demo instance.');
+
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],

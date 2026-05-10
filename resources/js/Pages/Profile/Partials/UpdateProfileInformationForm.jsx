@@ -34,7 +34,10 @@ export default function UpdateProfileInformation({
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Update your account's profile information and email address.
                 </p>
-            </header>
+                <p className="mt-2 text-sm font-semibold text-red-600 dark:text-red-400">
+                    ⚠️ Note: Profile updates are locked for this demo instance.
+                </p>
+            </header> 
 
             <form onSubmit={submit} className="mt-6 space-y-6">
                 <div>
@@ -48,6 +51,7 @@ export default function UpdateProfileInformation({
                         required
                         isFocused
                         autoComplete="name"
+                        disabled
                     />
 
                     <InputError className="mt-2" message={errors.name} />
@@ -64,6 +68,7 @@ export default function UpdateProfileInformation({
                         onChange={(e) => setData('email', e.target.value)}
                         required
                         autoComplete="username"
+                        disabled
                     />
 
                     <InputError className="mt-2" message={errors.email} />
@@ -89,11 +94,11 @@ export default function UpdateProfileInformation({
                                 email address.
                             </div>
                         )}
-                    </div>
+                    </div> 
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={true}>Save (Disabled)</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}

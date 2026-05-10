@@ -29,6 +29,9 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        // Hardcoded block for the demo.
+        // return Redirect::route('profile.edit')->with('error', 'Updating profile information is disabled in the demo instance.');
+
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -45,6 +48,9 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Hardcoded block for the demo.
+        return Redirect::route('profile.edit')->with('error', 'Deleting accounts is disabled in the demo instance.');
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);
