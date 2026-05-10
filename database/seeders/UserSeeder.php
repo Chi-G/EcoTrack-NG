@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         // Define some core roles to ensure we always have at least one of each with specific emails
         $seedUsers = [
             ['email' => 'resident@ecotrack.com', 'name' => 'Default Resident', 'role' => 'resident'],
-            ['email' => 'collector@ecotrack.com', 'name' => 'Default Collector', 'role' => 'collector'],
+            ['email' => 'collector@ecotrack.com', 'name' => 'Default Collector', 'role' => 'collector', 'recycling_center_id' => $center?->id],
             ['email' => 'recycler@ecotrack.com', 'name' => 'Default Recycler', 'role' => 'recycler', 'recycling_center_id' => $center?->id],
         ];
 
@@ -42,7 +42,12 @@ class UserSeeder extends Seeder
         }
 
         if (User::where('role', 'collector')->count() < 10) {
-            User::factory()->count(10)->collector()->create();
+            $centers = RecyclingCenter::all();
+            User::factory()->count(10)->collector()->create()->each(function ($user) use ($centers) {
+                if ($centers->count() > 0) {
+                    $user->update(['recycling_center_id' => $centers->random()->id]);
+                }
+            });
         }
 
         if (User::where('role', 'recycler')->count() < 10) {
