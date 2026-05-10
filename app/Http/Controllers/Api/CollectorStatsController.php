@@ -33,6 +33,7 @@ class CollectorStatsController extends Controller
             ->count();
 
         $pendingAvailable = WastePickup::where('status', 'pending')
+            ->where('recycling_center_id', $user->recycling_center_id)
             ->count();
 
         return response()->json([
